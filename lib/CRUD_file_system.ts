@@ -5,7 +5,6 @@ import { isEventViableToday } from "./crude_file_system_helpers";
 const fileDir = new Directory(Paths.document, "streak");
 const file = new File(fileDir, "events.json");
 
-// ✅ Type definition
 export type Event = {
   startDate: string; // ISO string
   interval: number;
@@ -18,14 +17,12 @@ export type Event = {
   last_checked: string; // ISO string
 };
 
-// ✅ Return type now includes all possible outcomes
 type ReadEventsResult =
   | Record<string, Event>
   | { error: string }
   | { fail: string }
   | { pass: string };
 
-// ✅ Read from file safely
 const readEvents = (): ReadEventsResult => {
   let eventData = null;
   try {
@@ -43,7 +40,7 @@ const readEvents = (): ReadEventsResult => {
   }
 };
 
-// ✅ Write safely — now enforces Record<string, Event>
+// Write safely — now enforces Record<string, Event>
 const writeEvents = (events: Record<string, Event>) => {
   try {
     file.write(JSON.stringify(events));
@@ -57,7 +54,7 @@ const writeEvents = (events: Record<string, Event>) => {
   }
 };
 
-// ✅ Create event safely
+// Create event safely
 export const createEvent = ({
   event_name,
   duration,
@@ -76,7 +73,6 @@ export const createEvent = ({
   try {
     const events = readEvents();
 
-    // 🟡 FIX: Check for errors before treating as record
     if ("error" in events || "fail" in events || "pass" in events) {
       return events;
     }
