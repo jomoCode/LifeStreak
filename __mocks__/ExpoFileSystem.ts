@@ -11,6 +11,7 @@ export class Directory {
 export class File {
   uri: string;
   exists: boolean;
+  
 
   constructor(...pathParts: (string | Directory)[]) {
     this.uri = 'file://' + pathParts.map(p =>
