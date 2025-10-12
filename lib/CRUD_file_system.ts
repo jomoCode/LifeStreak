@@ -1,6 +1,6 @@
 import { Directory, File, Paths } from "expo-file-system";
-import { cleanFileName, getTodayMidnightUTC } from "./generic_helpers";
 import { isEventViableToday } from "./crude_file_system_helpers";
+import { cleanFileName, getTodayMidnightUTC } from "./generic_helpers";
 
 const fileDir = new Directory(Paths.document, "streak");
 const file = new File(fileDir, "events.json");
@@ -17,13 +17,13 @@ export type Event = {
   last_checked: string; // ISO string
 };
 
-type ReadEventsResult =
+export type ReadEventsResult =
   | Record<string, Event>
   | { error: string }
   | { fail: string }
   | { pass: string };
 
-const readEvents = (): ReadEventsResult => {
+export const readEvents = (): ReadEventsResult => {
   let eventData = null;
   try {
     if (!file.exists) return { fail: "storage file not found" };
@@ -101,7 +101,6 @@ export const createEvent = ({
   }
 };
 
-
 export const updateEventField = <K extends keyof Event>(
   event_id: string,
   eventField: K,
@@ -109,7 +108,8 @@ export const updateEventField = <K extends keyof Event>(
 ) => {
   try {
     const events = readEvents();
-    if ("error" in events || "fail" in events || "pass" in events) return events;
+    if ("error" in events || "fail" in events || "pass" in events)
+      return events;
 
     const event = events[event_id];
     if (!event) return { failure: "Event not found" };
@@ -153,11 +153,11 @@ export const updateEventField = <K extends keyof Event>(
   }
 };
 
-
 export const deleteEvent = (event_id: string) => {
   try {
     const events = readEvents();
-    if ("error" in events || "fail" in events || "pass" in events) return events;
+    if ("error" in events || "fail" in events || "pass" in events)
+      return events;
 
     if (!events[event_id]) return { failure: "Event not found" };
 
@@ -172,7 +172,8 @@ export const deleteEvent = (event_id: string) => {
 export const tickEvent = ({ event_id }: { event_id: string }) => {
   try {
     const events = readEvents();
-    if ("error" in events || "fail" in events || "pass" in events) return events;
+    if ("error" in events || "fail" in events || "pass" in events)
+      return events;
 
     const event = events[event_id];
     if (!event) return { failure: "Event not found" };

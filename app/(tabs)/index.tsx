@@ -1,31 +1,36 @@
-import { Image } from 'expo-image';
-import {  StyleSheet, TextInput } from 'react-native';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
+import ParallaxScrollView from "@/components/parallax-scroll-view";
+import EventList from "@/components/ui/molecules/EventList";
+import { readEvents, ReadEventsResult } from "@/lib/CRUD_file_system";
+import { Image } from "expo-image";
+import { useEffect, useState } from "react";
+import { StyleSheet } from "react-native";
 
 export default function HomeScreen() {
+  const [events, setEvents] = useState<ReadEventsResult>({ pass: "" });
+  useEffect(() => {
+    const allEvevnts = readEvents();
+    setEvents(allEvevnts);
+  }, []);
+
   return (
     <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
+      headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
       headerImage={
         <Image
-          source={require('@/assets/images/partial-react-logo.png')}
+          source={require("@/assets/images/partial-react-logo.png")}
           style={styles.reactLogo}
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Life streak</ThemedText>
-        <TextInput></TextInput>
-      </ThemedView>
-          </ParallaxScrollView>
+      }
+    >
+      <EventList data={events} />
+    </ParallaxScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
   },
   stepContainer: {
@@ -37,6 +42,6 @@ const styles = StyleSheet.create({
     width: 290,
     bottom: 0,
     left: 0,
-    position: 'absolute',
+    position: "absolute",
   },
 });
