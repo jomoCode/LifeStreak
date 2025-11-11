@@ -39,7 +39,7 @@ export const validateUTCDateString = (dateStr: string, fieldName = "date"): void
       `${fieldName} must be in UTC ISO 8601 format and set to midnight (e.g. 2025-10-11T00:00:00Z). Received: ${dateStr}`
     );
   }
-  // Ensure it's an actual valid date
+
   const date = new Date(dateStr);
   if (isNaN(date.getTime())) {
     throw new Error(`${fieldName} is not a valid date: ${dateStr}`);
@@ -56,36 +56,68 @@ export const validateUTCDateString = (dateStr: string, fieldName = "date"): void
 export const getTodayMidnightUTC = (date?: string): string => {
   try {
     const now = date ? new Date(date) : new Date();
+    if (isNaN(now.getTime())) throw new Error("Invalid date");
     now.setUTCHours(0, 0, 0, 0);
-    now.getTime(); // will throw error if invalid date
     return now.toISOString();
   } catch (error: unknown) {
-    console.error(
-      `Invalid date provided to getTodayMidnightUTC: ${date}: error: ${error}`
-    );
-    return 'error getting date: getTodayMidnightUTC';
-  }
-};
-
-export {
-  cleanFileName,
-  /**
-   * @getTodayMidnightUTC
-   * Returns today's date set to midnight (00:00:00 UTC)
-   * in ISO string format.
-   */ getTodayMidnightUTC,
-  /**
-   * @validateUTCDateString
-   * Validates that a date string is in strict UTC ISO 8601 format
-   * and that the time is set to midnight (00:00:00Z). only suitable for utc dates not utctime
-   * Example of valid format: "2025-10-11T00:00:00Z"
-   * @param dateStr - The date string to validate
-   * @param fieldName - The name of the field being validated
-   * @throws Error if the date format is invalid or not set to midnight
-   */ validateUTCDateString,
-};
     const message = `Invalid date provided to getTodayMidnightUTC: ${date} - ${String(error)}`;
     if (__DEV__) console.error(message);
     return "Invalid date";
   }
 };
+
+
+let db: SQLite.SQLiteDatabase | null = null;
+
+/**
+ * Opens the SQLite database asynchronously (singleton pattern).
+ */
+async function openDB(): Promise<SQLite.SQLiteDatabase> {
+  if (!db) {
+    db = await SQLite.openDatabaseAsync("events.db");
+  }
+  return db;
+}
+
+/**
+ * Runs a SQL query and returns the results as an array of type T.
+ * Uses the modern async expo-sqlite API for cleaner, promise-based handling.
+ *
+ * @example
+ * const rows = await runSql<{ id: number; name: string }>("SELECT * FROM users");
+ */
+export async function runSql<T = any>(sql: string, params: any[] = []): Promise<T[]> {
+  if (!sql?.trim()) {
+    throw new Error("Empty SQL statement");
+  }
+
+  try {
+    const database = await openDB();
+
+    // Detect query type
+    const isSelect = /^\s*SELECT/i.test(sql);
+
+    if (isSelect) {
+      // SELECT queries return rows
+      const results = await database.getAllAsync<T>(sql, params);
+      return results;
+    } else {
+      // For INSERT, UPDATE, DELETE
+      await database.runAsync(sql, params);
+      return [];
+    }
+  } catch (error) {
+    if (__DEV__) console.error("SQLite Query Error:", error);
+    throw error;
+  }
+}
+
+export default {
+  cleanFileName,
+  getTodayMidnightUTC,
+  validateUTCDateString,
+  runSql,
+};
+
+
+
