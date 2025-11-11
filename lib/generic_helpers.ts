@@ -1,14 +1,39 @@
-const cleanFileName = (input: string) => {
-  return input
+import * as SQLite from "expo-sqlite";
+
+
+
+
+
+const __DEV__ = process.env.NODE_ENV !== "production";
+
+/**
+ * Cleans a string to make it safe for file naming.
+ * - Trims whitespace
+ * - Replaces spaces and invalid filesystem characters with underscores
+ * - Collapses multiple underscores
+ */
+export const cleanFileName = (input: string, lowercase = false): string => {
+  if (typeof input !== "string") return "";
+  let cleaned = input
     .trim()
-    .replace(/\s+/g, "_")
-    .replace(/[\/\\:*?"<>|]/g, "_")
-    .replace(/_+/g, "_");
+    .replace(/\s+/g, "_") // Replace spaces with underscores
+    .replace(/[\/\\:*?"<>|]/g, "_") // Replace forbidden characters
+    .replace(/_+/g, "_"); // Collapse multiple underscores
+  return lowercase ? cleaned.toLowerCase() : cleaned;
 };
 
-const validateUTCDateString = (dateStr: string, fieldName?: string) => {
-  // Strict pattern: YYYY-MM-DDT00:00:00Z
-  const isoUTCMidnightRegex = /^\d{4}-\d{2}-\d{2}T00:00:00Z$/;
+/**
+ * Validates that a date string is in strict UTC ISO 8601 format
+ * and represents midnight (00:00:00Z).
+ * Throws an error if invalid.
+ *
+ * @example
+ * validateUTCDateString("2025-10-11T00:00:00Z", "startDate");
+ */
+export const validateUTCDateString = (dateStr: string, fieldName = "date"): void => {
+  const isoUTCMidnightRegex =
+    /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])T00:00:00Z$/;
+
   if (!isoUTCMidnightRegex.test(dateStr)) {
     throw new Error(
       `${fieldName} must be in UTC ISO 8601 format and set to midnight (e.g. 2025-10-11T00:00:00Z). Received: ${dateStr}`
@@ -21,7 +46,14 @@ const validateUTCDateString = (dateStr: string, fieldName?: string) => {
   }
 };
 
-const getTodayMidnightUTC = (date?: string) => {
+/**
+ * Returns a date string set to midnight UTC (00:00:00Z) in ISO 8601 format.
+ * Optionally accepts a date string to normalize to UTC midnight.
+ *
+ * @example
+ * getTodayMidnightUTC(); // => "2025-11-11T00:00:00.000Z"
+ */
+export const getTodayMidnightUTC = (date?: string): string => {
   try {
     const now = date ? new Date(date) : new Date();
     now.setUTCHours(0, 0, 0, 0);
@@ -51,4 +83,9 @@ export {
    * @param fieldName - The name of the field being validated
    * @throws Error if the date format is invalid or not set to midnight
    */ validateUTCDateString,
+};
+    const message = `Invalid date provided to getTodayMidnightUTC: ${date} - ${String(error)}`;
+    if (__DEV__) console.error(message);
+    return "Invalid date";
+  }
 };
