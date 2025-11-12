@@ -52,7 +52,6 @@ export default function CreateEventScreen({ navigation }: any) {
       );
       Alert.alert("Success", "Event created successfully!");
       reset(); // clear form
-      navigation.goBack(); // or navigate to EventListScreen
     } catch (error) {
       console.error("Error creating event:", error);
       Alert.alert("Error", "Failed to create event");
@@ -99,6 +98,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f8fafc",
+    paddingTop:30,
     padding: 16,
   },
   header: {

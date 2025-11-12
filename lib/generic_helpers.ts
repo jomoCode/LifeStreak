@@ -1,4 +1,5 @@
 import * as SQLite from "expo-sqlite";
+import { initDatabase } from "./CRUDE_sqlite";
 
 
 
@@ -73,6 +74,8 @@ let db: SQLite.SQLiteDatabase | null = null;
  * Opens the SQLite database asynchronously (singleton pattern).
  */
 async function openDB(): Promise<SQLite.SQLiteDatabase> {
+  initDatabase()
+  
   if (!db) {
     db = await SQLite.openDatabaseAsync("events.db");
   }

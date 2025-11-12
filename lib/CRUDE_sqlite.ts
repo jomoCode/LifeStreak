@@ -23,7 +23,9 @@ let db: SQLite.SQLiteDatabase | null = null;
 /**
  * Opens the SQLite database asynchronously (singleton pattern).
  */
-export const openDB = async (): Promise<SQLite.SQLiteDatabase> => {
+type openDBType = Promise<SQLite.SQLiteDatabase>
+
+export const openDB = async ():openDBType  => {
   if (!db) {
     db = await SQLite.openDatabaseAsync("events.db");
   }
