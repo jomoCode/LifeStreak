@@ -1,2 +1,2 @@
-import EventList from "@/components/ui/molecules/EventList";
-export default EventList;
+import Event from "@/components/ui/organism/Events";
+export default Event;
