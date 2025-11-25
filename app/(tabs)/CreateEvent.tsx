@@ -1,8 +1,18 @@
+import {
+  cleanFileName,
+  getTodayMidnightUTC,
+  runSql,
+} from "@/lib/generic_helpers";
 import React from "react";
-import { Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert } from "react-native";
-import { useForm, Controller } from "react-hook-form";
-import { cleanFileName, getTodayMidnightUTC, runSql } from "@/lib/generic_helpers";
-
+import { Controller, useForm } from "react-hook-form";
+import {
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+} from "react-native";
 
 type FormValues = {
   eventName: string;
@@ -31,34 +41,63 @@ export default function CreateEventScreen({ navigation }: any) {
       return;
     }
 
-    const event_id = `${cleanFileName(data.eventName)}_${Date.now()}`;
+    // convert and normalize
+    const fixedData = {
+      ...data,
+      interval: Number(data.interval),
+      duration: Number(data.duration),
+      noOfTimes: Number(data.noOfTimes),
+    };
+
+    // Convert startDate to midnight UTC only ONCE
+    const startDateISO = getTodayMidnightUTC(fixedData.startDate);
+
+    // Convert startTime properly:
+    const startTimeISO = new Date(startDateISO);
+    const [hour, minute] = fixedData.startTime.split(":");
+    startTimeISO.setUTCHours(Number(hour));
+    startTimeISO.setUTCMinutes(Number(minute));
+    startTimeISO.setUTCSeconds(0);
+    startTimeISO.setUTCMilliseconds(0);
+
+    fixedData.startDate = startDateISO;
+    fixedData.startTime = startTimeISO.toISOString();
+
+    const event_id = `${cleanFileName(fixedData.eventName)}_${Date.now()}`;
+
     try {
       await runSql(
         `INSERT INTO events (
-          event_id, event_name, startDate, startTime, interval, duration, No_of_times_checked, No_of_times_to_be_checked, expired, last_checked
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        event_id, event_name, startDate, startTime, interval, duration,
+        No_of_times_checked, No_of_times_to_be_checked, expired, last_checked
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           event_id,
-          data.eventName,
-          data.startDate,
-          data.startTime,
-          Number(data.interval),
-          Number(data.duration),
-          0,
-          Number(data.noOfTimes),
-          0,
+          fixedData.eventName,
+          fixedData.startDate,
+          fixedData.startTime,
+          fixedData.interval,
+          fixedData.duration,
+          Number(0),
+          Number(fixedData.noOfTimes),
+          Number(0),
           getTodayMidnightUTC(),
         ]
       );
+
       Alert.alert("Success", "Event created successfully!");
-      reset(); // clear form
+      reset();
     } catch (error) {
       console.error("Error creating event:", error);
       Alert.alert("Error", "Failed to create event");
     }
   };
 
-  const renderInput = (name: keyof FormValues, label: string, keyboardType: "default" | "numeric" = "default") => (
+  const renderInput = (
+    name: keyof FormValues,
+    label: string,
+    keyboardType: "default" | "numeric" = "default"
+  ) => (
     <Controller
       control={control}
       name={name}
@@ -77,7 +116,10 @@ export default function CreateEventScreen({ navigation }: any) {
   );
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={{ paddingBottom: 40 }}
+    >
       <Text style={styles.header}>➕ Create New Event</Text>
 
       {renderInput("eventName", "Event Name")}
@@ -98,7 +140,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f8fafc",
-    paddingTop:30,
+    paddingTop: 30,
     padding: 16,
   },
   header: {

@@ -1,84 +1,90 @@
-import { Event, readEvents } from "@/lib/CRUDE_sqlite";
-import React, { useEffect, useState } from "react";
-import { FlatList, StyleSheet, Text, View } from "react-native";
+import { Event as EventType, readEvents } from "@/lib/CRUDE_sqlite";
+import React, { useCallback, useEffect, useState } from "react";
+import { FlatList, RefreshControl, StyleSheet, Text, View } from "react-native";
+import { EventListItem } from "../molecules/EventListItem";
+/**
+ * Organism: Events
+ * Handles fetching, rendering, and refreshing all stored events.
+ */
+export  const Events = () => {
+  const [data, setData] = useState<EventType[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
-const EventList = () => {
-  const [data, setData] = useState<Event[]>();
-  useEffect(() => {
-    const allEvents = async () => {
+  const loadEventsFromDb = useCallback(async () => {
+    try {
+      setLoading(true);
       const events = await readEvents();
 
-      if (events && typeof events === "object") {
+      if (!events) {
+        setData([]);
+        return;
+      }
+
+      if (typeof events === "object") {
         if ("error" in events) {
-          return <Text style={styles.message}>Error: {`${events.error}`}</Text>;
+          console.error("Error reading events:", events.error);
+          setData([]);
+          return;
         }
         if ("fail" in events) {
-          return <Text style={styles.message}>No events saved yet</Text>;
+          setData([]);
+          return;
         }
         if ("pass" in events) {
-          return <Text style={styles.message}>Pass: {`${events.pass}`}</Text>;
+          console.log("Pass message:", events.pass);
+          setData([]);
+          return;
         }
-      } else {
-        console.log("MY DATA: ", data);
-        return <Text style={styles.message}>Loading or invalid data</Text>;
       }
 
       setData(events);
-    };
-    allEvents();
+    } catch (err) {
+      console.error("Error loading events:", err);
+      setData([]);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  const events = data
-    ? Object.entries(data).map(([key, event]) => ({
-        id: key,
-        ...event,
-      }))
-    : [];
+  useEffect(() => {
+    loadEventsFromDb();
+  }, [loadEventsFromDb]);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadEventsFromDb();
+    setRefreshing(false);
+  };
 
   return (
-    <View style={{ flex: 1, paddingTop: 30, backgroundColor: "green" }}>
-      <FlatList
-        data={events}
-        keyExtractor={(item) => item.event_id}
-        renderItem={({ item }) => (
-          <View style={styles.card}>
-            <Text style={styles.id}>Event ID: {item.event_id}</Text>
-            <Text>Start Date: {new Date(item.startDate).toLocaleString()}</Text>
-            <Text>
-              Start Time: {new Date(item.startTime).toLocaleTimeString()}
-            </Text>
-            <Text>Duration: {item.duration} min</Text>
-            <Text>
-              Checks: {item.No_of_times_checked}/
-              {item.No_of_times_to_be_checked}
-            </Text>
-            <Text style={{ color: item.expired ? "red" : "green" }}>
-              {item.expired ? "Expired" : "Active"}
-            </Text>
-          </View>
-        )}
-        ListEmptyComponent={<Text style={styles.message}>No events found</Text>}
-      />
+    <View style={styles.container}>
+      {loading && data.length === 0 ? (
+        <Text style={styles.message}>Loading events...</Text>
+      ) : (
+        <FlatList
+          data={data}
+          keyExtractor={(item) => item.event_id}
+          renderItem={({ item }) => (
+            <EventListItem item={item} onEventUpdated={loadEventsFromDb} />
+          )}
+          ListEmptyComponent={
+            <Text style={styles.message}>No events found</Text>
+          }
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+        />
+      )}
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  card: {
-    backgroundColor: "#f9f9f9",
-    marginVertical: 8,
-    marginHorizontal: 12,
-    padding: 16,
-    borderRadius: 10,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 3,
-  },
-  id: {
-    fontWeight: "bold",
-    fontSize: 16,
-    marginBottom: 4,
+  container: {
+    flex: 1,
+    paddingTop: 30,
+    backgroundColor: "#f0f0f0",
   },
   message: {
     textAlign: "center",
@@ -87,5 +93,3 @@ const styles = StyleSheet.create({
     color: "gray",
   },
 });
-
-export default EventList;

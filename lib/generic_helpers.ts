@@ -2,9 +2,6 @@ import * as SQLite from "expo-sqlite";
 import { initDatabase } from "./CRUDE_sqlite";
 
 
-
-
-
 const __DEV__ = process.env.NODE_ENV !== "production";
 
 /**
