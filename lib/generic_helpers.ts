@@ -1,7 +1,6 @@
 import * as SQLite from "expo-sqlite";
 import { initDatabase } from "./CRUDE_sqlite";
 
-
 const __DEV__ = process.env.NODE_ENV !== "production";
 
 /**
@@ -10,7 +9,7 @@ const __DEV__ = process.env.NODE_ENV !== "production";
  * - Replaces spaces and invalid filesystem characters with underscores
  * - Collapses multiple underscores
  */
-export const cleanFileName = (input: string, lowercase = false): string => {
+const cleanFileName = (input: string, lowercase = false): string => {
   if (typeof input !== "string") return "";
   let cleaned = input
     .trim()
@@ -28,7 +27,7 @@ export const cleanFileName = (input: string, lowercase = false): string => {
  * @example
  * validateUTCDateString("2025-10-11T00:00:00Z", "startDate");
  */
-export const validateUTCDateString = (dateStr: string, fieldName = "date"): void => {
+const validateUTCDateString = (dateStr: string, fieldName = "date"): void => {
   const isoUTCMidnightRegex =
     /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])T00:00:00Z$/;
 
@@ -51,33 +50,34 @@ export const validateUTCDateString = (dateStr: string, fieldName = "date"): void
  * @example
  * getTodayMidnightUTC(); // => "2025-11-11T00:00:00.000Z"
  */
-export const getTodayMidnightUTC = (date?: string): string => {
+const getTodayMidnightUTC = (date?: string): string => {
   try {
     const now = date ? new Date(date) : new Date();
     if (isNaN(now.getTime())) throw new Error("Invalid date");
     now.setUTCHours(0, 0, 0, 0);
     return now.toISOString();
   } catch (error: unknown) {
-    const message = `Invalid date provided to getTodayMidnightUTC: ${date} - ${String(error)}`;
+    const message = `Invalid date provided to getTodayMidnightUTC: ${date} - ${String(
+      error
+    )}`;
     if (__DEV__) console.error(message);
     return "Invalid date";
   }
 };
-
 
 let db: SQLite.SQLiteDatabase | null = null;
 
 /**
  * Opens the SQLite database asynchronously (singleton pattern).
  */
-async function openDB(): Promise<SQLite.SQLiteDatabase> {
-  initDatabase()
-  
+const openDB = async () => {
+  initDatabase();
+
   if (!db) {
     db = await SQLite.openDatabaseAsync("events.db");
   }
   return db;
-}
+};
 
 /**
  * Runs a SQL query and returns the results as an array of type T.
@@ -86,7 +86,7 @@ async function openDB(): Promise<SQLite.SQLiteDatabase> {
  * @example
  * const rows = await runSql<{ id: number; name: string }>("SELECT * FROM users");
  */
-export async function runSql<T = any>(sql: string, params: any[] = []): Promise<T[]> {
+const runSql = async <T>(sql: string, params: any[] = []) => {
   if (!sql?.trim()) {
     throw new Error("Empty SQL statement");
   }
@@ -110,14 +110,27 @@ export async function runSql<T = any>(sql: string, params: any[] = []): Promise<
     if (__DEV__) console.error("SQLite Query Error:", error);
     throw error;
   }
-}
-
-export default {
-  cleanFileName,
-  getTodayMidnightUTC,
-  validateUTCDateString,
-  runSql,
 };
 
+/**
+ * convert all values to string
+ */
+const convert2String = (value: unknown) => (value == null ? "" : String(value));
 
 
+/**
+ * convert all values to number
+ */
+const convert2Number = (value: unknown, fallbackValue = 0) => {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : fallbackValue;
+};
+
+export {
+  cleanFileName,
+  convert2Number,
+  convert2String,
+  getTodayMidnightUTC,
+  runSql,
+  validateUTCDateString,
+};

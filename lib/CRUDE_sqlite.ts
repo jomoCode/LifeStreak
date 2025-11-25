@@ -1,6 +1,9 @@
-// CRUD_sqlite.ts
-import * as SQLite from "expo-sqlite";
-import { getTodayMidnightUTC, runSql } from "./generic_helpers";
+import {
+  convert2Number,
+  getTodayMidnightUTC,
+  runSql,
+} from "./generic_helpers";
+import { cleanDatabaseRow } from "./crude_sqlite_helpers";
 
 // ------------------- Types -------------------
 export type Event = {
@@ -16,100 +19,18 @@ export type Event = {
   last_checked: string; // ISO string (midnight UTC) or empty string
 };
 
-let db: SQLite.SQLiteDatabase | null = null;
 
-/**
- * Opens the SQLite database asynchronously (singleton pattern).
- */
-type openDBType = Promise<SQLite.SQLiteDatabase>;
 
-export const openDB = async (): openDBType => {
-  if (!db) {
-    db = await SQLite.openDatabaseAsync("events.db");
-  }
-  return db;
-};
 
-/**
- * Initializes the events table if it doesn't already exist.
- */
-export const initDatabase = async (): Promise<void> => {
-  try {
-    const database = await openDB();
-    await database.execAsync(`
-      CREATE TABLE IF NOT EXISTS events (
-        event_id TEXT PRIMARY KEY,
-        event_name TEXT,
-        startDate TEXT,
-        startTime TEXT,
-        interval INTEGER,
-        duration INTEGER,
-        No_of_times_checked INTEGER,
-        No_of_times_to_be_checked INTEGER,
-        expired INTEGER,
-        last_checked TEXT
-      );
-    `);
-    console.log("✅ Events table initialized successfully.");
-  } catch (error) {
-    console.error("❌ Failed to initialize database:", error);
-  }
-};
 
-// ------------------- Helpers -------------------
-const safeNumber = (v: any, fallback = 0) => {
-  const n = Number(v);
-  return Number.isFinite(n) ? n : fallback;
-};
-
-const safeString = (v: any) => (v == null ? "" : String(v));
-
-/**
- * Normalize a raw DB row into the `Event` shape expected by the frontend.
- * This ensures booleans, numbers and dates are in predictable formats and
- * prevents runtime crashes caused by unexpected types coming from the DB.
- */
-const normalizeRow = (row: any): Event & Record<string, any> => {
-  // keep any extra fields that queries might add (e.g. days_since_start)
-  const normalized: Event & Record<string, any> = {
-    event_id: safeString(row.event_id),
-    event_name: safeString(row.event_name),
-
-    // store startDate as provided (prefer ISO midnight UTC) or empty string
-    startDate: row.startDate ? String(row.startDate) : "",
-
-    // startTime should be a full ISO string. If DB only stored a time fragment
-    // or an invalid value, keep it as string so UI can guard against invalid dates.
-    startTime: row.startTime ? String(row.startTime) : "",
-
-    interval: safeNumber(row.interval, 1),
-    duration: safeNumber(row.duration, 1),
-    No_of_times_checked: safeNumber(row.No_of_times_checked, 0),
-    No_of_times_to_be_checked: safeNumber(row.No_of_times_to_be_checked, 0),
-
-    // convert 0/1 or strings into boolean
-    expired: Boolean(row.expired && Number(row.expired) !== 0),
-
-    last_checked: row.last_checked ? String(row.last_checked) : "",
-  };
-
-  // preserve computed fields from queries (e.g. days_since_start)
-  for (const k in row) {
-    if (!(k in normalized)) normalized[k] = row[k];
-  }
-
-  return normalized;
-};
-
-// ------------------- CRUD -------------------
 // Read all events
-export const readEvents = async ()  => {
+export const readEvents = async () => {
   try {
-    const rows = await runSql("SELECT * FROM events");]
+    const rows = await runSql("SELECT * FROM events");
 
     if (!Array.isArray(rows)) return [];
 
-    const normalizedEventsArray = rows.map((r) => normalizeRow(r));
+    const normalizedEventsArray = rows.map((r) => cleanDatabaseRow(r));
 
     return normalized;
   } catch (error: unknown) {
@@ -149,8 +70,8 @@ export const createEvent = async ({
       // expected format like "08:00" or "8:00"
       const [hourStr = "0", minuteStr = "0"] = startTime.split(":");
       const dt = new Date(startDateISO);
-      const hour = safeNumber(hourStr, 0);
-      const minute = safeNumber(minuteStr, 0);
+      const hour = convert2Number(hourStr, 0);
+      const minute = convert2Number(minuteStr, 0);
       dt.setUTCHours(hour, minute, 0, 0);
       startTimeISO = dt.toISOString();
     } else {
@@ -263,7 +184,9 @@ export const deleteEvent = async (event_id: string) => {
 // ------------------- Tick / Viable -------------------
 
 // Get events viable today
-export const getViableEventsToday = async (): Promise<Event[] | { error: string }> => {
+export const getViableEventsToday = async (): Promise<
+  Event[] | { error: string }
+> => {
   try {
     const todayISO = getTodayMidnightUTC();
     const rows = await runSql<any>(
@@ -278,9 +201,12 @@ export const getViableEventsToday = async (): Promise<Event[] | { error: string 
     if (!Array.isArray(rows)) return [];
 
     const normalized = rows
-      .map((r) => normalizeRow(r))
+      .map((r) => cleanDatabaseRow(r))
       .filter((event) => {
-        const days_since_start = safeNumber((event as any).days_since_start, -9999);
+        const days_since_start = convert2Number(
+          (event as any).days_since_start,
+          -9999
+        );
         return (
           days_since_start >= 0 &&
           days_since_start <= event.duration &&
@@ -310,7 +236,7 @@ export const tickEvent = async (event_id: string) => {
     const row = Array.isArray(rows) && rows[0] ? rows[0] : null;
     if (!row) return { failure: "Event not found" };
 
-    const event = normalizeRow(row) as any;
+    const event = cleanDatabaseRow(row) as any;
     const {
       days_since_start,
       interval,
@@ -319,7 +245,8 @@ export const tickEvent = async (event_id: string) => {
       No_of_times_to_be_checked,
     } = event;
 
-    if (No_of_times_checked >= No_of_times_to_be_checked) return { failure: "Event completed" };
+    if (No_of_times_checked >= No_of_times_to_be_checked)
+      return { failure: "Event completed" };
     if (
       days_since_start < 0 ||
       days_since_start > duration ||
