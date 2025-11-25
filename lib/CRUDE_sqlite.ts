@@ -95,15 +95,21 @@ export const createEvent = async ({
   }
 };
 
+type UpdateEventField<K extends keyof Event> = {
+  event_id: string;
+  eventField: K;
+  updatedValue: Event[K];
+};
+
 // Update specific field of event
-export const updateEventField = async <K extends keyof Event>(
-  event_id: string,
-  eventField: K,
-  updatedValue: Event[K] | string | number | boolean
-) => {
+export const updateEventField = async <K extends keyof Event>({
+  event_id,
+  eventField,
+  updatedValue,
+}: UpdateEventField<K>) => {
   const mutableFields: (keyof Event)[] = [
     "event_name",
-    "s tartDate",
+    "startDate",
     "startTime",
     "interval",
     "duration",
@@ -115,7 +121,7 @@ export const updateEventField = async <K extends keyof Event>(
   if (!mutableFields.includes(eventField))
     return { error: "Field cannot be updated" };
 
-  let valueToStore: string | number = updatedValue as string | number;
+  let valueToStore: unknown = updatedValue;
 
   if (
     [
@@ -128,10 +134,13 @@ export const updateEventField = async <K extends keyof Event>(
     valueToStore = Number(updatedValue);
 
   if (eventField === "expired") {
-    // Support boolean, numeric strings, and numbers
-    const val = updatedValue as any;
-    const bool = typeof val === "boolean" ? val : Number(val) !== 0;
-    valueToStore = bool ? 1 : 0;
+    // Convert booleans to ) and 1's for sqlite compatablity
+    const suspectedBooleanValue = updatedValue;
+    if (typeof suspectedBooleanValue === "boolean")
+      valueToStore = suspectedBooleanValue ? 1 : 0;
+    else {
+      throw new Error("Error saving data: Expired is suppoed to be a boolean");
+    }
   }
 
   if (eventField === "startDate" || eventField === "last_checked")
@@ -139,15 +148,13 @@ export const updateEventField = async <K extends keyof Event>(
 
   if (eventField === "startTime") {
     // Accept either an ISO or a time string like "08:00"
-    const s = String(updatedValue);
-    if (s.includes("T")) valueToStore = new Date(s).toISOString();
+    const startTimeString = String(updatedValue);
+    if (startTimeString.includes("T")) valueToStore = new Date(startTimeString).toISOString();
     else {
-      // combine with current stored startDate for this event isn't available here,
-      // so assume updatedValue is an ISO or time string where we just convert to ISO
-      const dt = new Date();
-      const [h = "0", m = "0"] = s.split(":");
-      dt.setUTCHours(Number(h), Number(m), 0, 0);
-      valueToStore = dt.toISOString();
+      const jsDate = new Date();
+      const [h = "0", m = "0"] = startTimeString.split(":");
+      jsDate.setUTCHours(Number(h), Number(m), 0, 0);
+      valueToStore = jsDate.toISOString();
     }
   }
 
