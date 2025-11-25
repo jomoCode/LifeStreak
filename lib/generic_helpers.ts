@@ -1,5 +1,5 @@
 import * as SQLite from "expo-sqlite";
-import { initDatabase } from "./CRUDE_sqlite";
+import { initDatabase } from "./crude_sqlite_helpers";
 
 const __DEV__ = process.env.NODE_ENV !== "production";
 
@@ -120,14 +120,16 @@ const convert2String = (value: unknown) => (value == null ? "" : String(value));
 /**
  * convert all values to number
  */
-const convert2Number = (value: unknown, fallbackValue = 0) => {
-  const n = Number(value);
-  return Number.isFinite(n) ? n : fallbackValue;
+const convert2Number = (value: unknown, errorLocation: string) => {
+  const number2Convert = Number(value);
+  if (Number.isFinite(number2Convert)) return number2Convert;
+  else {
+    throw new Error(`failure converting value to number: error Location: ${errorLocation}`);
+  }
 };
 
-
 /**
- * Convert time string: HH:MM to ISO time string 
+ * Convert time string: HH:MM to ISO time string
  */
 const convertHHMM_2IsoTimeString = (timeString: string, isoDate: string) => {
   // Time string format: "HH:MM"
@@ -137,8 +139,8 @@ const convertHHMM_2IsoTimeString = (timeString: string, isoDate: string) => {
   if (!isoDate.includes("T"))
     throw new Error("Invalid date supplied: convertHHMM_2IsoTimeString");
   const date = new Date(isoDate);
-  const hour = convert2Number(hourStr, 0);
-  const minute = convert2Number(minuteStr, 0);
+  const hour = convert2Number(hourStr, "hour convertHHMM_2IsoTimeString");
+  const minute = convert2Number(minuteStr, "minute convertHHMM_2IsoTimeString");
   date.setUTCHours(hour, minute, 0, 0);
   return date.toISOString();
 };

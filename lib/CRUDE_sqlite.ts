@@ -149,7 +149,8 @@ export const updateEventField = async <K extends keyof Event>({
   if (eventField === "startTime") {
     // Accept either an ISO or a time string like "08:00"
     const startTimeString = String(updatedValue);
-    if (startTimeString.includes("T")) valueToStore = new Date(startTimeString).toISOString();
+    if (startTimeString.includes("T"))
+      valueToStore = new Date(startTimeString).toISOString();
     else {
       const jsDate = new Date();
       const [h = "0", m = "0"] = startTimeString.split(":");
@@ -182,12 +183,10 @@ export const deleteEvent = async (event_id: string) => {
 // ------------------- Tick / Viable -------------------
 
 // Get events viable today
-export const getViableEventsToday = async (): Promise<
-  Event[] | { error: string }
-> => {
+export const getViableEventsToday = async () => {
   try {
     const todayISO = getTodayMidnightUTC();
-    const rows = await runSql<any>(
+    const rows: Event[] = await runSql(
       `
       SELECT *, CAST((julianday(?) - julianday(startDate)) AS INTEGER) AS days_since_start
       FROM events
@@ -199,12 +198,9 @@ export const getViableEventsToday = async (): Promise<
     if (!Array.isArray(rows)) return [];
 
     const normalized = rows
-      .map((r) => cleanDatabaseRow(r))
+      .map((row) => cleanDatabaseRow(row))
       .filter((event) => {
-        const days_since_start = convert2Number(
-          (event as any).days_since_start,
-          -9999
-        );
+        const days_since_start = convert2Number(event.days_since_start, 'getViableEventsToday');
         return (
           days_since_start >= 0 &&
           days_since_start <= event.duration &&
@@ -234,7 +230,7 @@ export const tickEvent = async (event_id: string) => {
     const row = Array.isArray(rows) && rows[0] ? rows[0] : null;
     if (!row) return { failure: "Event not found" };
 
-    const event = cleanDatabaseRow(row) as any;
+    const event = cleanDatabaseRow(row);
     const {
       days_since_start,
       interval,

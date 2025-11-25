@@ -21,10 +21,10 @@ const cleanDatabaseRow = (row: Event) => {
     startDate: row.startDate ? String(row.startDate) : "",
     startTime: row.startTime ? String(row.startTime) : "",
 
-    interval: convert2Number(row.interval, -1),
-    duration: convert2Number(row.duration, -1),
-    No_of_times_checked: convert2Number(row.No_of_times_checked, 0),
-    No_of_times_to_be_checked: convert2Number(row.No_of_times_to_be_checked, 0),
+    interval: convert2Number(row.interval, 'interval cleanDatabaseRow'),
+    duration: convert2Number(row.duration, 'duration cleanDatabaseRow'),
+    No_of_times_checked: convert2Number(row.No_of_times_checked, 'No_of_times_checked cleanDatabaseRow'),
+    No_of_times_to_be_checked: convert2Number(row.No_of_times_to_be_checked, 'No_of_times_to_be_checked cleanDatabaseRow'),
 
     // convert 0/1 or strings into boolean
     expired: Boolean(row.expired && Number(row.expired) !== 0),
