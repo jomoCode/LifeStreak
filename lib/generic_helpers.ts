@@ -117,7 +117,6 @@ const runSql = async <T>(sql: string, params: any[] = []) => {
  */
 const convert2String = (value: unknown) => (value == null ? "" : String(value));
 
-
 /**
  * convert all values to number
  */
@@ -126,10 +125,29 @@ const convert2Number = (value: unknown, fallbackValue = 0) => {
   return Number.isFinite(n) ? n : fallbackValue;
 };
 
+
+/**
+ * Convert time string: HH:MM to ISO time string 
+ */
+const convertHHMM_2IsoTimeString = (timeString: string, isoDate: string) => {
+  // Time string format: "HH:MM"
+  const [hourStr = "0", minuteStr = "0"] = timeString.split(":");
+  if (hourStr === "0" || minuteStr === "0")
+    throw new Error("Invalid time timeString: convertHHMM_2IsoTimeString");
+  if (!isoDate.includes("T"))
+    throw new Error("Invalid date supplied: convertHHMM_2IsoTimeString");
+  const date = new Date(isoDate);
+  const hour = convert2Number(hourStr, 0);
+  const minute = convert2Number(minuteStr, 0);
+  date.setUTCHours(hour, minute, 0, 0);
+  return date.toISOString();
+};
+
 export {
   cleanFileName,
   convert2Number,
   convert2String,
+  convertHHMM_2IsoTimeString,
   getTodayMidnightUTC,
   runSql,
   validateUTCDateString,

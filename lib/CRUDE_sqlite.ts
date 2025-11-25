@@ -1,9 +1,10 @@
+import { cleanDatabaseRow } from "./crude_sqlite_helpers";
 import {
   convert2Number,
+  convertHHMM_2IsoTimeString,
   getTodayMidnightUTC,
   runSql,
 } from "./generic_helpers";
-import { cleanDatabaseRow } from "./crude_sqlite_helpers";
 
 // ------------------- Types -------------------
 export type Event = {
@@ -19,20 +20,25 @@ export type Event = {
   last_checked: string; // ISO string (midnight UTC) or empty string
 };
 
-
-
-
+export type CreateEvent = {
+  event_name: string;
+  duration: string;
+  interval: string;
+  startTime: string; // Time formats: "08:00" or full ISO
+  startDate: string; // Date formats:  YYYY-MM-DD or ISO
+  no_of_times_to_be_checked: string;
+};
 
 // Read all events
 export const readEvents = async () => {
   try {
-    const rows = await runSql("SELECT * FROM events");
+    const rows: Event[] = await runSql("SELECT * FROM events");
 
     if (!Array.isArray(rows)) return [];
 
     const normalizedEventsArray = rows.map((r) => cleanDatabaseRow(r));
 
-    return normalized;
+    return normalizedEventsArray;
   } catch (error: unknown) {
     return { error: `Error reading events: ${error}` };
   }
@@ -46,37 +52,22 @@ export const createEvent = async ({
   startTime,
   startDate,
   no_of_times_to_be_checked,
-}: {
-  event_name: string;
-  duration: string;
-  interval: string;
-  startTime: string; // either a time like "08:00" or a full ISO
-  startDate: string; // date in YYYY-MM-DD or ISO
-  no_of_times_to_be_checked: string;
-}) => {
+}: CreateEvent) => {
   try {
     const event_id = `${event_name.replace(/\s+/g, "_")}_${Date.now()}`;
 
-    // normalize startDate into midnight UTC ISO using helper (defensive)
     const startDateISO = getTodayMidnightUTC(startDate);
 
-    // Normalize startTime: if the provided startTime already looks like an ISO
-    // keep it; otherwise combine with startDateISO and produce a UTC ISO string.
     let startTimeISO = "";
     if (typeof startTime === "string" && startTime.includes("T")) {
-      // assume it's already an ISO
+      //  Assumes start time already in ISO if it contains T
       startTimeISO = new Date(startTime).toISOString();
     } else if (typeof startTime === "string") {
-      // expected format like "08:00" or "8:00"
-      const [hourStr = "0", minuteStr = "0"] = startTime.split(":");
-      const dt = new Date(startDateISO);
-      const hour = convert2Number(hourStr, 0);
-      const minute = convert2Number(minuteStr, 0);
-      dt.setUTCHours(hour, minute, 0, 0);
-      startTimeISO = dt.toISOString();
+      // Time format must be: "08:00" or "8:00" or full ISO STRING
+      startTimeISO = convertHHMM_2IsoTimeString(startTime, startDateISO);
     } else {
       // fallback: use startDate midnight
-      startTimeISO = startDateISO;
+      throw new Error("start Time format is invalid");
     }
 
     await runSql(
@@ -112,7 +103,7 @@ export const updateEventField = async <K extends keyof Event>(
 ) => {
   const mutableFields: (keyof Event)[] = [
     "event_name",
-    "startDate",
+    "s tartDate",
     "startTime",
     "interval",
     "duration",
