@@ -4,7 +4,7 @@ import { Dimensions, StyleSheet } from "react-native";
 type Theme = "light" | "dark";
 const { width, height } = Dimensions.get("window");
 
-export const onBoardingStyles = (theme: Theme) =>
+export const Styles = (theme: Theme) =>
   StyleSheet.create({
     container: {
       flex: 1,
@@ -23,7 +23,6 @@ export const onBoardingStyles = (theme: Theme) =>
       width: "100%",
       height: "auto",
       justifyContent: "space-between",
-      backgroundColor: "blue",
     },
     logo: {
       width: 100,
@@ -97,5 +96,28 @@ export const onBoardingStyles = (theme: Theme) =>
     nextButton: {
       width: 200,
       justifyContent: "center",
+    },
+  });
+
+export const buttonStyles = (theme: Theme) =>
+  StyleSheet.create({
+    container: {
+      borderRadius: 30,
+      padding: 5,
+      justifyContent: "center",
+      alignItems: "center",
+      overflow: "hidden",
+      width: 120,
+      height: 60,
+      borderWidth: 3,
+      borderColor: Colors[theme].border,
+      backgroundColor: Colors[theme].buttonTomato,
+    },
+    content: { width: "100%" },
+    text: {
+      color: Colors[theme].text,
+      textAlign: "center",
+      fontFamily: "Bangers-Regular",
+      fontSize: 25,
     },
   });

@@ -1,8 +1,8 @@
-import { onBoardingStyles } from "@/lib/styles/onboarding_styles";
+import { Styles } from "@/lib/styles/Styles";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Router, useRouter } from "expo-router";
 import * as React from "react";
 import {
-  Button,
   FlatList,
   Image,
   Text,
@@ -10,11 +10,12 @@ import {
   View,
   type ViewToken,
 } from "react-native";
+import { Button } from "../atoms/Button";
 
 type ViewAbleItems = { viewableItems: ViewToken[] };
-const updateOnboardingStatus = () => {
+const updateOnboardingStatus = async () => {
   try {
-    localStorage.setItem("onBoarding", JSON.stringify({ status: true }));
+    await AsyncStorage.setItem("onBoarding", JSON.stringify({ status: true }));
   } catch (error) {
     console.error(`Error updating onboarding status: ${error}`);
   }
@@ -23,50 +24,23 @@ const updateOnboardingStatus = () => {
 export const onBoardingScreenPages = [
   {
     id: "1",
-    title: "Achieve your every goal",
-    subTitle: "Specify your goal",
-    image: require("../../../assets/images/la.png"),
+    title: "Dream Bigger",
+    subTitle: "Set goals that move you",
+    image: require("../../../assets/images/onBoarding_1.png"),
   },
   {
     id: "2",
-    title: "Create a streak plan",
-    subTitle: " Life streak- How much time can you devote to your goals",
-    image: require("../../../assets/images/la.png"),
+    title: "Stay Consistent",
+    subTitle: "Build a daily rhythm of growth",
+    image: require("../../../assets/images/onBoarding_2.png"),
   },
   {
     id: "3",
-    title: "Track your adherance",
-    subTitle:
-      "Effortlessly track your efforts & Stay Motivated with visual Progress Reports",
-    image: require("../../../assets/images/la.png"),
+    title: "See Your Progress",
+    subTitle: "Watch your efforts turn into results",
+    image: require("../../../assets/images/onBoarding_3.png"),
   },
 ];
-
-const getTitleKey = (id: string) => {
-  switch (id) {
-    case "1":
-      return "";
-    case "2":
-      return "";
-    case "3":
-      return "";
-    default:
-      return "";
-  }
-};
-
-const getSubTitleKey = (id: string) => {
-  switch (id) {
-    case "1":
-      return "";
-    case "2":
-      return "";
-    case "3":
-      return "";
-    default:
-      return "";
-  }
-};
 
 const handleSkip = (router: Router) => {
   updateOnboardingStatus();
@@ -75,14 +49,13 @@ const handleSkip = (router: Router) => {
 
 const OnboardingScreen = () => {
   const [currentIndex, setCurrentIndex] = React.useState(0);
+  const router = useRouter();
   const theme = useColorScheme() === "dark" ? "dark" : "light";
-  const styles = onBoardingStyles(theme);
+  const styles = Styles(theme);
 
   const flatListRef = React.useRef<FlatList<
     (typeof onBoardingScreenPages)[number]
   > | null>(null);
-
-  const router = useRouter();
 
   const handleNext = () => {
     if (currentIndex < onBoardingScreenPages.length - 1) {
@@ -120,12 +93,12 @@ const OnboardingScreen = () => {
             <View style={styles.headerContainer}>
               {/* Logo */}
               <Image
-                source={require("../../../assets/images/la.png")}
+                source={require("../../../assets/images/life-streak.png")}
                 style={styles.logo}
                 resizeMode="contain"
               />
               <Button
-                title="click"
+                text="Skip"
                 onPress={() => {
                   handleSkip(router);
                 }}
@@ -149,8 +122,8 @@ const OnboardingScreen = () => {
                 />
               ))}
             </View>
-            <Text style={styles.title}>{getTitleKey(item.id)}</Text>
-            <Text style={styles.subTitle}>{getSubTitleKey(item.id)}</Text>
+            <Text style={styles.title}>{item.title}</Text>
+            <Text style={styles.subTitle}>{item.subTitle}</Text>
           </View>
         )}
         keyExtractor={(item) => item.id}
@@ -163,19 +136,20 @@ const OnboardingScreen = () => {
 
       <View style={styles.buttonContainer}>
         <Button
+          text="left"
           onPress={() => {
             if (currentIndex >= 1) {
               try {
-                flatListRef.current?.scrollToIndex({ index: currentIndex - 1 });
+                flatListRef.current?.scrollToIndex({
+                  index: currentIndex - 1,
+                });
               } catch (error) {
                 console.error(`Error scrolling to previous item: ${error}`);
               }
             }
           }}
-          title="left"
         />
-
-        <Button onPress={handleNext} title="right" />
+        <Button onPress={handleNext} text="right" />
       </View>
     </View>
   );
