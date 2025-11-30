@@ -1,4 +1,5 @@
-import { Styles } from "@/lib/styles/Styles";
+import { Colors } from "@/constants/theme";
+import { Styles, textStyles } from "@/lib/styles/Styles";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Router, useRouter } from "expo-router";
 import * as React from "react";
@@ -10,7 +11,9 @@ import {
   View,
   type ViewToken,
 } from "react-native";
-import { Button } from "../atoms/Button";
+import { LsButton } from "../atoms/LsButton";
+import { IconSymbol } from "../icon-symbol";
+import { MaterialIcons } from "@expo/vector-icons";
 
 type ViewAbleItems = { viewableItems: ViewToken[] };
 const updateOnboardingStatus = async () => {
@@ -52,6 +55,7 @@ const OnboardingScreen = () => {
   const router = useRouter();
   const theme = useColorScheme() === "dark" ? "dark" : "light";
   const styles = Styles(theme);
+  const textStyle = textStyles(theme);
 
   const flatListRef = React.useRef<FlatList<
     (typeof onBoardingScreenPages)[number]
@@ -97,12 +101,13 @@ const OnboardingScreen = () => {
                 style={styles.logo}
                 resizeMode="contain"
               />
-              <Button
-                text="Skip"
+              <LsButton
                 onPress={() => {
                   handleSkip(router);
                 }}
-              />
+              >
+                <Text style={textStyle.buttonText}>skip</Text>
+              </LsButton>
             </View>
             {/* Main Image */}
             <Image
@@ -135,8 +140,7 @@ const OnboardingScreen = () => {
       />
 
       <View style={styles.buttonContainer}>
-        <Button
-          text="left"
+        <LsButton
           onPress={() => {
             if (currentIndex >= 1) {
               try {
@@ -148,8 +152,12 @@ const OnboardingScreen = () => {
               }
             }
           }}
-        />
-        <Button onPress={handleNext} text="right" />
+        >
+          <MaterialIcons name="arrow-back" size={35} color={Colors[theme].text} />
+        </LsButton>
+        <LsButton onPress={handleNext}>
+          <MaterialIcons name="arrow-forward" size={35} color={Colors[theme].text} />
+        </LsButton>
       </View>
     </View>
   );

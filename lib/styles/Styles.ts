@@ -103,7 +103,6 @@ export const buttonStyles = (theme: Theme) =>
   StyleSheet.create({
     container: {
       borderRadius: 30,
-      padding: 5,
       justifyContent: "center",
       alignItems: "center",
       overflow: "hidden",
@@ -113,8 +112,18 @@ export const buttonStyles = (theme: Theme) =>
       borderColor: Colors[theme].border,
       backgroundColor: Colors[theme].buttonTomato,
     },
-    content: { width: "100%" },
+    content: { width: "100%", justifyContent: "center", alignItems: "center" },
     text: {
+      color: Colors[theme].text,
+      textAlign: "center",
+      fontFamily: "Bangers-Regular",
+      fontSize: 25,
+    },
+  });
+
+export const textStyles = (theme: Theme) =>
+  StyleSheet.create({
+    buttonText: {
       color: Colors[theme].text,
       textAlign: "center",
       fontFamily: "Bangers-Regular",

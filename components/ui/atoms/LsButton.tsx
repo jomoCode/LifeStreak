@@ -14,12 +14,11 @@ type Mode =
 
 type ButtonProps = {
   onPress: () => void;
-  text: string;
   mode?: Mode;
   children: ReactNode;
 };
 
-const Button = ({ onPress, text, mode, children }: ButtonProps) => {
+const LsButton = ({ onPress, mode, children }: ButtonProps) => {
   const theme = useColorScheme() === "dark" ? "dark" : "light";
   const styles = buttonStyles(theme);
   return (
@@ -28,13 +27,11 @@ const Button = ({ onPress, text, mode, children }: ButtonProps) => {
       mode={mode}
       rippleColor={Colors[theme].tint}
       compact={true}
-      contentStyle={{ padding: 0 }}
+      style={styles.container}
     >
-      <View style={styles.container}>
-        <View style={styles.content}>{children}</View>
-      </View>
+      <View style={styles.content}>{children}</View>
     </RnaButton>
   );
 };
 
-export { Button };
+export { LsButton };
