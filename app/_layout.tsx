@@ -10,9 +10,6 @@ import * as Font from "expo-font";
 import { useEffect, useState } from "react";
 import { PaperProvider } from "react-native-paper";
 
-export const unstable_settings = {
-  anchor: "(tabs)",
-};
 
 export default function RootLayout() {
   const themeHook = useColorScheme();
@@ -24,7 +21,6 @@ export default function RootLayout() {
     async function loadFonts() {
       await Font.loadAsync({
         "Bangers-Regular": require("../assets/fonts/Bangers-Regular.ttf"),
-        // Add more fonts here if needed
       });
       setFontsLoaded(true);
     }
@@ -38,9 +34,7 @@ export default function RootLayout() {
   return (
     <LsThemeProvider>
       <PaperProvider>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        </Stack>
+        <Stack screenOptions={{headerShown:false}}/>
         <StatusBar style="auto" />
       </PaperProvider>
     </LsThemeProvider>

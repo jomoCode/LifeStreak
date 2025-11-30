@@ -63,7 +63,7 @@ const OnboardingScreen = () => {
       }
     } else {
       updateOnboardingStatus();
-      router.replace("/");
+      router.replace("/(tabs)");
     }
   };
 
