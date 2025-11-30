@@ -1,14 +1,10 @@
-import {
-  DarkTheme,
-  DefaultTheme,
-  ThemeProvider,
-} from "@react-navigation/native";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
 
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { Colors } from "@/constants/theme";
+import { LsThemeProvider } from "@/context/useTheme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import * as Font from "expo-font";
 import { useEffect, useState } from "react";
@@ -40,13 +36,13 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider value={themeHook === "dark" ? DarkTheme : DefaultTheme}>
+    <LsThemeProvider>
       <PaperProvider>
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         </Stack>
         <StatusBar style="auto" />
       </PaperProvider>
-    </ThemeProvider>
+    </LsThemeProvider>
   );
 }
