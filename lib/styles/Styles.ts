@@ -73,7 +73,7 @@ export const Styles = (theme: Theme) =>
     },
     buttonContainer: {
       flexDirection: "row",
-      justifyContent: "space-evenly",
+      justifyContent: "space-between",
       width: "80%",
       marginBottom: 20,
     },

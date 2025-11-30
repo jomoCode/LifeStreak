@@ -105,8 +105,9 @@ const OnboardingScreen = () => {
                 onPress={() => {
                   handleSkip(router);
                 }}
+
               >
-                <Text style={textStyle.buttonText}>skip</Text>
+                <Text style={textStyle.buttonText}>Skip</Text>
               </LsButton>
             </View>
             {/* Main Image */}
