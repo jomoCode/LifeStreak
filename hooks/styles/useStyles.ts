@@ -1,14 +1,16 @@
-import { Colors } from "@/constants/theme";
+import { useColors } from "@/hooks/useColors";
 import { Dimensions, StyleSheet } from "react-native";
 
 type Theme = "light" | "dark";
 const { width, height } = Dimensions.get("window");
 
-export const Styles = (theme: Theme) =>
-  StyleSheet.create({
+export const useOnboardingStyles = () => {
+  const Colors = useColors();
+
+  return StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: Colors[theme].background,
+      backgroundColor: Colors.background,
       justifyContent: "center",
       alignItems: "center",
     },
@@ -36,7 +38,7 @@ export const Styles = (theme: Theme) =>
       justifyContent: "center",
     },
     skipButtonText: {
-      color: Colors[theme].buttonTomato,
+      color: Colors.buttonTomato,
     },
     mainImage: {
       flex: 0.7,
@@ -53,7 +55,7 @@ export const Styles = (theme: Theme) =>
     subTitle: {
       fontSize: 16,
       textAlign: "center",
-      color: Colors[theme].text,
+      color: Colors.text,
       marginTop: 10,
       width: "90%",
     },
@@ -69,7 +71,7 @@ export const Styles = (theme: Theme) =>
       marginHorizontal: 5,
     },
     activeDot: {
-      backgroundColor: Colors[theme].tabIconDefault,
+      backgroundColor: Colors.tabIconDefault,
     },
     buttonContainer: {
       flexDirection: "row",
@@ -82,15 +84,15 @@ export const Styles = (theme: Theme) =>
       alignItems: "center",
       padding: 10,
       borderRadius: 20,
-      backgroundColor: Colors[theme].buttonTomato,
+      backgroundColor: Colors.buttonTomato,
     },
     buttonText: {
-      color: Colors[theme].text,
+      color: Colors.text,
       fontWeight: "bold",
       marginRight: 5,
     },
     previousButton: {
-      backgroundColor: Colors[theme].buttonTomato,
+      backgroundColor: Colors.buttonTomato,
       width: 60,
     },
     nextButton: {
@@ -98,9 +100,10 @@ export const Styles = (theme: Theme) =>
       justifyContent: "center",
     },
   });
-
-export const buttonStyles = (theme: Theme) =>
-  StyleSheet.create({
+};
+export const useButtonStyles = () => {
+  const Colors = useColors();
+  return StyleSheet.create({
     container: {
       borderRadius: 30,
       justifyContent: "center",
@@ -109,24 +112,20 @@ export const buttonStyles = (theme: Theme) =>
       width: 120,
       height: 60,
       borderWidth: 3,
-      borderColor: Colors[theme].border,
-      backgroundColor: Colors[theme].buttonTomato,
+      borderColor: Colors.border,
+      backgroundColor: Colors.buttonTomato,
     },
-    content: { width: "100%", justifyContent: "center", alignItems: "center" },
+    content: { width: "100%", justifyContent: "center", alignItems: "center", },
     text: {
-      color: Colors[theme].text,
+      color: Colors.text,
       textAlign: "center",
       fontFamily: "Bangers-Regular",
       fontSize: 25,
+      width: "100%",
     },
   });
-
-export const textStyles = (theme: Theme) =>
-  StyleSheet.create({
-    buttonText: {
-      color: Colors[theme].text,
-      textAlign: "center",
-      fontFamily: "Bangers-Regular",
-      fontSize: 25,
-    },
-  });
+};
+export const useTextStyles = () => {
+  const Colors = useColors();
+  return StyleSheet.create({});
+};
