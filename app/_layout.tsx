@@ -12,6 +12,7 @@ import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import * as Font from "expo-font";
 import { useEffect, useState } from "react";
+import { PaperProvider } from "react-native-paper";
 
 export const unstable_settings = {
   anchor: "(tabs)",
@@ -40,10 +41,12 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={themeHook === "dark" ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      </Stack>
-      <StatusBar style="auto" />
+      <PaperProvider>
+        <Stack>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        </Stack>
+        <StatusBar style="auto" />
+      </PaperProvider>
     </ThemeProvider>
   );
 }
