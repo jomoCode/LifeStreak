@@ -1,19 +1,11 @@
-import { Colors } from "@/constants/theme";
-import { Styles, textStyles } from "@/lib/styles/Styles";
+import { useButtonStyles, useOnboardingStyles } from "@/hooks/styles/useStyles";
+import { useColors } from "@/hooks/useColors";
+import { MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Router, useRouter } from "expo-router";
 import * as React from "react";
-import {
-  FlatList,
-  Image,
-  Text,
-  useColorScheme,
-  View,
-  type ViewToken,
-} from "react-native";
+import { FlatList, Image, Text, View, type ViewToken } from "react-native";
 import { LsButton } from "../atoms/LsButton";
-import { IconSymbol } from "../icon-symbol";
-import { MaterialIcons } from "@expo/vector-icons";
 
 type ViewAbleItems = { viewableItems: ViewToken[] };
 const updateOnboardingStatus = async () => {
@@ -51,16 +43,17 @@ const handleSkip = (router: Router) => {
 };
 
 const OnboardingScreen = () => {
+  // Hooks
   const [currentIndex, setCurrentIndex] = React.useState(0);
   const router = useRouter();
-  const theme = useColorScheme() === "dark" ? "dark" : "light";
-  const styles = Styles(theme);
-  const textStyle = textStyles(theme);
-
+  const styles = useOnboardingStyles();
+  const buttonStyles = useButtonStyles();
+  const colors = useColors();
   const flatListRef = React.useRef<FlatList<
     (typeof onBoardingScreenPages)[number]
   > | null>(null);
 
+  // HELPERS
   const handleNext = () => {
     if (currentIndex < onBoardingScreenPages.length - 1) {
       try {
@@ -105,9 +98,10 @@ const OnboardingScreen = () => {
                 onPress={() => {
                   handleSkip(router);
                 }}
-
               >
-                <Text style={textStyle.buttonText}>Skip</Text>
+                <Text style={buttonStyles.text ?? { color: "white" }}>
+                  Skip
+                </Text>
               </LsButton>
             </View>
             {/* Main Image */}
@@ -154,10 +148,10 @@ const OnboardingScreen = () => {
             }
           }}
         >
-          <MaterialIcons name="arrow-back" size={35} color={Colors[theme].text} />
+          <MaterialIcons name="arrow-back" size={35} color={colors.text} />
         </LsButton>
         <LsButton onPress={handleNext}>
-          <MaterialIcons name="arrow-forward" size={35} color={Colors[theme].text} />
+          <MaterialIcons name="arrow-forward" size={35} color={colors.text} />
         </LsButton>
       </View>
     </View>
