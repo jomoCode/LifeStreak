@@ -9,7 +9,7 @@ import { useColorScheme } from "@/hooks/use-color-scheme";
 import * as Font from "expo-font";
 import { useEffect, useState } from "react";
 import { PaperProvider } from "react-native-paper";
-
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function RootLayout() {
   const themeHook = useColorScheme();
@@ -34,8 +34,10 @@ export default function RootLayout() {
   return (
     <LsThemeProvider>
       <PaperProvider>
-        <Stack screenOptions={{headerShown:false}}/>
-        <StatusBar style="auto" />
+        <SafeAreaView style={{flex:1}}>
+          <Stack screenOptions={{ headerShown: false }} />
+          <StatusBar style="auto" />
+        </SafeAreaView>
       </PaperProvider>
     </LsThemeProvider>
   );
