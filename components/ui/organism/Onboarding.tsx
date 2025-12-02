@@ -15,6 +15,14 @@ const updateOnboardingStatus = async () => {
     console.error(`Error updating onboarding status: ${error}`);
   }
 };
+const getOnboardingStatusAsync = async () => {
+  try {
+    const result = await AsyncStorage.getItem("onBoarding");
+    return result;
+  } catch (error) {
+    console.error(`Error updating onboarding status: ${error}`);
+  }
+};
 
 export const onBoardingScreenPages = [
   {
@@ -67,6 +75,16 @@ const OnboardingScreen = () => {
     }
   };
 
+  React.useEffect(() => {
+    (async () => {
+      const status = await getOnboardingStatusAsync();
+      if (status) {
+        router.push("/(tabs)");
+      }
+    })();
+  }, []);
+
+  
   const onViewableItemsChanged = React.useCallback(
     ({ viewableItems }: ViewAbleItems) => {
       const ViewableItem = viewableItems[0].index;
