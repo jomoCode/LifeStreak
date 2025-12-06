@@ -1,27 +1,38 @@
 import { LsButton } from "@/components/ui/atoms/LsButton";
 import { StreakFormValues, useStreakForm } from "@/context/useCreateStreakForm";
 import { useGeneralStyles } from "@/hooks/styles/useStyles";
+import { useColors } from "@/hooks/useColors";
+import { MaterialIcons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import React from "react";
-import { Image, Text, TextInput, View, StyleSheet } from "react-native";
+import { Image, StyleSheet, Text, TextInput, View } from "react-native";
 
 type CreateEventProps = {
   title: string;
   placeholder: string;
   field: keyof StreakFormValues;
+  prevUrl?: string;
 };
 
-const CreateEvent = ({ title, placeholder, field }: CreateEventProps) => {
+const CreateEvent = ({
+  title,
+  placeholder,
+  field,
+  prevUrl,
+}: CreateEventProps) => {
   const styles = useGeneralStyles();
+  const colors = useColors();
   const lsForm = useStreakForm();
+  const router = useRouter();
 
   const form = lsForm.form;
   const handlers = lsForm.setters;
   const errors = lsForm.errors;
   const submit = lsForm.submit;
-  
+
   const formHandler = handlers[field];
   const value = form[field];
-  
+
   // Safely convert value to string
   const displayValue = value != null ? String(value) : "";
 
@@ -36,25 +47,52 @@ const CreateEvent = ({ title, placeholder, field }: CreateEventProps) => {
       </View>
 
       <View style={localStyles.formContainer}>
-        <Text style={localStyles.title}>{title}</Text>
-        
-        <TextInput
-          value={displayValue}
-          onChangeText={formHandler}
-          placeholder={placeholder}
-          style={localStyles.input}
-          placeholderTextColor="#999"
-        />
-        
-        {errors[field] && (
-          <Text style={localStyles.errorText}>{errors[field]}</Text>
-        )}
+        <View style={{ height: "50%", justifyContent: "flex-end" }}>
+          <Text style={localStyles.title}>{title}</Text>
 
-        <LsButton
+          <TextInput
+            value={displayValue}
+            onChangeText={formHandler}
+            placeholder={placeholder}
+            style={localStyles.input}
+            placeholderTextColor="#999"
+          />
+
+          {errors[field] && (
+            <Text style={localStyles.errorText}>{errors[field]}</Text>
+          )}
+        </View>
+        {/* <LsButton
           onPress={() => submit((values) => console.log("submit ok", values))}
         >
-          Next
-        </LsButton>
+         <MaterialCommunityIcons name="arrow-right-thick" size={30}/>
+          <Text>Next</Text>
+        </LsButton> */}
+
+        <View style={{ height: "50%", justifyContent: "center" }}>
+          <View style={{}}>
+            {prevUrl && (
+              <LsButton
+                onPress={() => {
+                  router.back();
+                }}
+              >
+                <MaterialIcons
+                  name="arrow-back"
+                  size={35}
+                  color={colors.text}
+                />
+              </LsButton>
+            )}
+            <LsButton onPress={() => ""}>
+              <MaterialIcons
+                name="arrow-forward"
+                size={35}
+                color={colors.text}
+              />
+            </LsButton>
+          </View>
+        </View>
       </View>
     </View>
   );
@@ -78,19 +116,21 @@ const localStyles = StyleSheet.create({
     padding: 20,
   },
   title: {
-    fontSize: 18,
-    fontWeight: "600",
+    fontSize: 24,
     marginBottom: 16,
+    fontWeight:'bold',
+    color: "orange",
     textAlign: "center",
   },
   input: {
-    width: "100%",
-    borderWidth: 1,
-    borderColor: "#ddd",
+    width: 290,
+    backgroundColor: "#EDEDED",
+    borderWidth: 0,
     borderRadius: 8,
-    padding: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
     marginVertical: 8,
-    fontSize: 16,
+    fontSize: 20,
   },
   errorText: {
     color: "red",

@@ -1,5 +1,4 @@
 import { isYYDDMMFormat } from "@/lib/generic_helpers";
-import { rules } from "@/lib/StreakContextHelpers";
 import React, { createContext, useContext, useState } from "react";
 
 export type StreakFormValues = {
@@ -60,7 +59,49 @@ export const StreakFormProvider = ({ children }: StreakFormProviderProps) => {
   // Helpers: validators
 
   // Field validation returns error string or undefined
-const setFieldError = (field: keyof StreakFormValues, message?: string) =>
+  const rules = {
+    goalTitle: (v: string) => {
+      if (!v || !v.trim()) return "Please enter your goal before continuing.";
+      if (v.trim().length > 100)
+        return "Goal is too long (max 100 characters).";
+      return undefined;
+    },
+    startDate: (v: string) => {
+      if (!v || !v.trim()) return "Start date is required.";
+      if (!isYYDDMMFormat(v.trim())) return "Start date must be YYYY-MM-DD.";
+      // optionally: ensure not in the past — if you want that, uncomment:
+      const asDate = new Date(v);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (asDate.getTime() < today.getTime()) {
+        return "Start date cannot be in the past.";
+      }
+      return undefined;
+    },
+    duration: (v: number) => {
+      if (typeof v !== "number" || Number.isNaN(v))
+        return "Duration is required.";
+      if (v < 1) return "Duration must be at least 1 day.";
+      if (v > 30) return "Maximum duration is 30 days.";
+      return undefined;
+    },
+    interval: (v: number) => {
+      if (typeof v !== "number" || Number.isNaN(v))
+        return "Interval is required.";
+      if (v < 1 || v > 7)
+        return "Interval must be between 1 (daily) and 7 (weekly).";
+      return undefined;
+    },
+    timesPerDay: (v: number) => {
+      if (typeof v !== "number" || Number.isNaN(v))
+        return "Times per day is required.";
+      if (v < 1) return "Times per day must be at least 1.";
+      if (v > 24) return "Times per day cannot exceed 24.";
+      return undefined;
+    },
+  };
+
+  const setFieldError = (field: keyof StreakFormValues, message?: string) =>
     setErrors((prev) => {
       const next = { ...prev };
       if (message) next[field] = message;
