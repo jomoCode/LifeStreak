@@ -1,45 +1,25 @@
-import { Colors } from "@/constants/theme";
 import { useButtonStyles } from "@/hooks/styles/useStyles";
 import React, { ReactNode, useEffect, useRef } from "react";
-import { Animated, useColorScheme, View, ViewStyle } from "react-native";
-import { Button as RnaButton } from "react-native-paper";
-
-type Mode =
-  | "text"
-  | "outlined"
-  | "contained"
-  | "elevated"
-  | "contained-tonal"
-  | undefined;
+import { Animated, Pressable, View, ViewStyle } from "react-native";
 
 type ButtonProps = {
   onPress: () => void;
-  mode?: Mode;
   children: ReactNode;
   accessibilityLabel?: string;
 };
 
-const LsButton = ({
-  onPress,
-  mode,
-  children,
-  accessibilityLabel,
-}: ButtonProps) => {
-  const theme = useColorScheme() === "dark" ? "dark" : "light";
+const LsButton = ({ onPress, children, accessibilityLabel }: ButtonProps) => {
   const styles = useButtonStyles();
 
   if (styles) {
     return (
-      <RnaButton
+      <Pressable
         onPress={onPress}
-        mode={mode}
-        rippleColor={Colors[theme].tint}
-        compact={true}
         style={styles.container}
         accessibilityLabel={accessibilityLabel}
       >
         <View style={styles.content}>{children}</View>
-      </RnaButton>
+      </Pressable>
     );
   } else {
     return <LsPulsating />;
