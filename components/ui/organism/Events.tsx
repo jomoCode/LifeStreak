@@ -1,15 +1,18 @@
 import { Event as EventType, readEvents } from "@/lib/CRUDE_sqlite";
+import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import { FlatList, RefreshControl, StyleSheet, Text, View } from "react-native";
+import { ActionButton } from "../atoms/ActionButton";
 import { EventListItem } from "../molecules/EventListItem";
 /**
  * Organism: Events
  * Handles fetching, rendering, and refreshing all stored events.
  */
-export  const Events = () => {
+export const Events = () => {
   const [data, setData] = useState<EventType[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const router = useRouter();
 
   const loadEventsFromDb = useCallback(async () => {
     try {
@@ -76,9 +79,14 @@ export  const Events = () => {
           }
         />
       )}
+      <ActionButton
+        handleSubmit={() => {
+          router.push("/CreateEvents");
+        }}
+      />
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
