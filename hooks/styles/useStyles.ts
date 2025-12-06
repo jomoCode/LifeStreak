@@ -32,7 +32,7 @@ export const useGeneralStyles = () => {
       marginBottom: 20,
     },
     logoLarge: {
-      width: "auto",
+      width: 100,
       height: 100,
     },
     skipButton: {
