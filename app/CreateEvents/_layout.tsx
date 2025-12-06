@@ -4,7 +4,7 @@ import { Stack } from "expo-router";
 const EventCreation = () => {
   return (
     <StreakFormProvider>
-      <Stack />
+      <Stack screenOptions={{ headerShown: false }} />
     </StreakFormProvider>
   );
 };
