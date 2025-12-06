@@ -43,6 +43,13 @@ const validateUTCDateString = (dateStr: string, fieldName = "date"): void => {
   }
 };
 
+/*
+ YYYY-MM-DD basic check (does not check for invalid dates like 2025-02-30)
+*/
+const isYYDDMMFormat = (v: string) => {
+  return /^\d{4}-\d{2}-\d{2}$/.test(v);
+};
+
 /**
  * Returns a date string set to midnight UTC (00:00:00Z) in ISO 8601 format.
  * Optionally accepts a date string to normalize to UTC midnight.
@@ -124,7 +131,9 @@ const convert2Number = (value: unknown, errorLocation: string) => {
   const number2Convert = Number(value);
   if (Number.isFinite(number2Convert)) return number2Convert;
   else {
-    throw new Error(`failure converting value to number: error Location: ${errorLocation}`);
+    throw new Error(
+      `failure converting value to number: error Location: ${errorLocation}`
+    );
   }
 };
 
@@ -151,6 +160,7 @@ export {
   convert2String,
   convertHHMM_2IsoTimeString,
   getTodayMidnightUTC,
+  isYYDDMMFormat,
   runSql,
   validateUTCDateString,
 };
