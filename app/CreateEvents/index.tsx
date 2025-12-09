@@ -1,13 +1,26 @@
 import CreateEvent from "@/components/ui/Template/CreateEvent";
+import { useStreakForm } from "@/context/useCreateStreakForm";
+import { useRouter } from "expo-router";
 
-const EventTitle = () => {
+export default function GoalTitleScreen() {
+  const streak = useStreakForm();
+const router = useRouter();
   return (
     <CreateEvent
-      title="Enter your goal"
-      field="goalTitle"
-      placeholder="e.g Read 10 pages in 10 days"
+      title="Your Goal"
+      placeholder="Enter goal title"
+      fieldType="text"
+      value={streak.form.goalTitle}
+      onChange={(value) => {
+        if (typeof value !== "string") {
+          throw new Error("Invalid value type");
+        }
+        streak.setGoalTitle(value);
+      }}
+      onNext={() => {
+    router.push("/CreateEvents/StartDate");
+      
+      }}
     />
   );
-};
-
-export default EventTitle;
+}

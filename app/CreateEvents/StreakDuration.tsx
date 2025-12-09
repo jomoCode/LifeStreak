@@ -2,26 +2,27 @@ import CreateEvent from "@/components/ui/Template/CreateEvent";
 import { useStreakForm } from "@/context/useCreateStreakForm";
 import { useRouter } from "expo-router";
 
-export default function StartDateScreen() {
+export default function DurationScreen() {
   const streak = useStreakForm();
   const router = useRouter();
 
   return (
     <CreateEvent
-      title="Start Date"
-      fieldType="date"
-      value={streak.form.startDate}
+      title="How long is your streak?"
+      placeholder=""
+      fieldType="number"
+      value={streak.form.duration}
       onChange={(d) => {
-        if (typeof d !== "string") {
+        if (typeof d !== "number") {
           throw new Error("Invalid value type");
         }
-        streak.setStartDate(d);
+        streak.setDuration(d);
       }}
       onPrev={() => {
         router.back();
       }}
       onNext={() => {
-        router.push("/CreateEvents/StartTime");
+        router.push("/CreateEvents/StreakInterval");
       }}
     />
   );

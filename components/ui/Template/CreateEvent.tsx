@@ -2,20 +2,21 @@ import { LsButton } from "@/components/ui/atoms/LsButton";
 import { useGeneralStyles } from "@/hooks/styles/useStyles";
 import { useColors } from "@/hooks/useColors";
 import { MaterialIcons } from "@expo/vector-icons";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import React from "react";
 import { Image, StyleSheet, Text, TextInput, View } from "react-native";
-import DateTimePicker from "@react-native-community/datetimepicker";
 
-type FieldType = "text" | "number" | "date" | "select";
+type FieldType = "text" | "number" | "date" | "time" | "select";
+
 
 type CreateEventProps = {
   title: string;
   placeholder?: string;
   value: string | number | Date;
   fieldType: FieldType;
-
   options?: { label: string; value: string | number }[]; // used if select
-
+  min?: number; // for number picker
+  max?: number; // for number picker
   onChange: (value: string | number | Date) => void;
   onNext?: () => void;
   onPrev?: () => void;
@@ -27,6 +28,8 @@ export default function CreateEvent({
   value,
   fieldType,
   options,
+  min,
+  max,
   onChange,
   onNext,
   onPrev,
@@ -35,6 +38,18 @@ export default function CreateEvent({
   const colors = useColors();
 
   const [showDatePicker, setShowDatePicker] = React.useState(false);
+
+  const handleIncrement = () => {
+    if (typeof value === "number") {
+      if (max == null || value < max) onChange(value + 1);
+    }
+  };
+
+  const handleDecrement = () => {
+    if (typeof value === "number") {
+      if (min == null || value > min) onChange(value - 1);
+    }
+  };
 
   const renderField = () => {
     switch (fieldType) {
@@ -50,7 +65,18 @@ export default function CreateEvent({
         );
 
       case "number":
-        return (
+        return min != null || max != null ? (
+          // number picker
+          <View style={localStyles.numberPicker}>
+            <LsButton onPress={handleDecrement}>
+              <Text style={{ fontSize: 20, color: colors.text }}>−</Text>
+            </LsButton>
+            <Text style={localStyles.numberValue}>{value}</Text>
+            <LsButton onPress={handleIncrement}>
+              <Text style={{ fontSize: 20, color: colors.text }}>+</Text>
+            </LsButton>
+          </View>
+        ) : (
           <TextInput
             placeholder={placeholder}
             keyboardType="numeric"
@@ -64,12 +90,15 @@ export default function CreateEvent({
         return (
           <>
             <TextInput
-              value={value instanceof Date ? value.toISOString().slice(0, 10) : String(value ?? "")}
+              value={
+                value instanceof Date
+                  ? value.toISOString().slice(0, 10)
+                  : String(value ?? "")
+              }
               style={localStyles.input}
               editable={false}
               onPressIn={() => setShowDatePicker(true)}
             />
-
             {showDatePicker && (
               <DateTimePicker
                 value={value instanceof Date ? value : new Date()}
@@ -82,6 +111,34 @@ export default function CreateEvent({
             )}
           </>
         );
+
+   case "time":
+  return (
+    <>
+      <TextInput
+        value={
+          value instanceof Date
+            ? value.toTimeString().slice(0, 5) // "HH:MM"
+            : String(value ?? "")
+        }
+        style={localStyles.input}
+        editable={false}
+        onPressIn={() => setShowDatePicker(true)}
+      />
+      {showDatePicker && (
+        <DateTimePicker
+          value={value instanceof Date ? value : new Date()}
+          mode="time"
+          is24Hour={true}
+          onChange={(_, selected) => {
+            setShowDatePicker(false);
+            if (selected) onChange(selected);
+          }}
+        />
+      )}
+    </>
+  );
+
 
       case "select":
         return (
@@ -170,5 +227,17 @@ const localStyles = StyleSheet.create({
     paddingVertical: 10,
     alignItems: "center",
     gap: 10,
+  },
+  numberPicker: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    width: 200,
+    marginVertical: 8,
+  },
+  numberValue: {
+    fontSize: 20,
+    textAlign: "center",
+    width: 60,
   },
 });
