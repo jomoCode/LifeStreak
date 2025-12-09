@@ -1,40 +1,103 @@
 import { LsButton } from "@/components/ui/atoms/LsButton";
-import { StreakFormValues, useStreakForm } from "@/context/useCreateStreakForm";
 import { useGeneralStyles } from "@/hooks/styles/useStyles";
 import { useColors } from "@/hooks/useColors";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
 import React from "react";
 import { Image, StyleSheet, Text, TextInput, View } from "react-native";
+import DateTimePicker from "@react-native-community/datetimepicker";
+
+type FieldType = "text" | "number" | "date" | "select";
 
 type CreateEventProps = {
   title: string;
-  placeholder: string;
-  field: keyof StreakFormValues;
-  prevUrl?: string;
+  placeholder?: string;
+  value: string | number | Date;
+  fieldType: FieldType;
+
+  options?: { label: string; value: string | number }[]; // used if select
+
+  onChange: (value: string | number | Date) => void;
+  onNext?: () => void;
+  onPrev?: () => void;
 };
 
-const CreateEvent = ({
+export default function CreateEvent({
   title,
   placeholder,
-  field,
-  prevUrl,
-}: CreateEventProps) => {
+  value,
+  fieldType,
+  options,
+  onChange,
+  onNext,
+  onPrev,
+}: CreateEventProps) {
   const styles = useGeneralStyles();
   const colors = useColors();
-  const lsForm = useStreakForm();
-  const router = useRouter();
 
-  const form = lsForm.form;
-  const handlers = lsForm.setters;
-  const errors = lsForm.errors;
-  const submit = lsForm.submit;
+  const [showDatePicker, setShowDatePicker] = React.useState(false);
 
-  const formHandler = handlers[field];
-  const value = form[field];
+  const renderField = () => {
+    switch (fieldType) {
+      case "text":
+        return (
+          <TextInput
+            placeholder={placeholder}
+            placeholderTextColor="#999"
+            style={localStyles.input}
+            value={String(value ?? "")}
+            onChangeText={onChange}
+          />
+        );
 
-  // Safely convert value to string
-  const displayValue = value != null ? String(value) : "";
+      case "number":
+        return (
+          <TextInput
+            placeholder={placeholder}
+            keyboardType="numeric"
+            style={localStyles.input}
+            value={String(value ?? "")}
+            onChangeText={(text) => onChange(Number(text))}
+          />
+        );
+
+      case "date":
+        return (
+          <>
+            <TextInput
+              value={value instanceof Date ? value.toISOString().slice(0, 10) : String(value ?? "")}
+              style={localStyles.input}
+              editable={false}
+              onPressIn={() => setShowDatePicker(true)}
+            />
+
+            {showDatePicker && (
+              <DateTimePicker
+                value={value instanceof Date ? value : new Date()}
+                mode="date"
+                onChange={(_, selected) => {
+                  setShowDatePicker(false);
+                  if (selected) onChange(selected);
+                }}
+              />
+            )}
+          </>
+        );
+
+      case "select":
+        return (
+          <View style={localStyles.selectBox}>
+            {options?.map((opt) => (
+              <LsButton key={String(opt.value)} onPress={() => onChange(opt.value)}>
+                <Text style={{ color: colors.text }}>{opt.label}</Text>
+              </LsButton>
+            ))}
+          </View>
+        );
+
+      default:
+        return null;
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -49,65 +112,36 @@ const CreateEvent = ({
       <View style={localStyles.formContainer}>
         <View style={{ height: "50%", justifyContent: "flex-end" }}>
           <Text style={localStyles.title}>{title}</Text>
-
-          <TextInput
-            value={displayValue}
-            onChangeText={formHandler}
-            placeholder={placeholder}
-            style={localStyles.input}
-            placeholderTextColor="#999"
-          />
-
-          {errors[field] && (
-            <Text style={localStyles.errorText}>{errors[field]}</Text>
-          )}
+          {renderField()}
         </View>
-        {/* <LsButton
-          onPress={() => submit((values) => console.log("submit ok", values))}
-        >
-         <MaterialCommunityIcons name="arrow-right-thick" size={30}/>
-          <Text>Next</Text>
-        </LsButton> */}
 
         <View style={{ height: "50%", justifyContent: "center" }}>
-          <View style={{}}>
-            {prevUrl && (
-              <LsButton
-                onPress={() => {
-                  router.back();
-                }}
-              >
-                <MaterialIcons
-                  name="arrow-back"
-                  size={35}
-                  color={colors.text}
-                />
+          <View>
+            {onPrev && (
+              <LsButton onPress={onPrev}>
+                <MaterialIcons name="arrow-back" size={35} color={colors.text} />
               </LsButton>
             )}
-            <LsButton onPress={() => ""}>
-              <MaterialIcons
-                name="arrow-forward"
-                size={35}
-                color={colors.text}
-              />
-            </LsButton>
+            {onNext && (
+              <LsButton onPress={onNext}>
+                <MaterialIcons name="arrow-forward" size={35} color={colors.text} />
+              </LsButton>
+            )}
           </View>
         </View>
       </View>
     </View>
   );
-};
+}
 
 const localStyles = StyleSheet.create({
   logoContainer: {
     paddingVertical: 10,
     height: "20%",
-    width: "100%",
     justifyContent: "center",
     alignItems: "center",
   },
   formContainer: {
-    width: "100%",
     height: "70%",
     borderRadius: 150,
     justifyContent: "center",
@@ -118,26 +152,23 @@ const localStyles = StyleSheet.create({
   title: {
     fontSize: 24,
     marginBottom: 16,
-    fontWeight:'bold',
+    fontWeight: "bold",
     color: "orange",
     textAlign: "center",
   },
   input: {
     width: 290,
     backgroundColor: "#EDEDED",
-    borderWidth: 0,
     borderRadius: 8,
     paddingHorizontal: 10,
-    paddingVertical: 5,
+    paddingVertical: 8,
     marginVertical: 8,
     fontSize: 20,
   },
-  errorText: {
-    color: "red",
-    fontSize: 14,
-    marginTop: 4,
-    marginBottom: 8,
+  selectBox: {
+    width: 290,
+    paddingVertical: 10,
+    alignItems: "center",
+    gap: 10,
   },
 });
-
-export default CreateEvent;

@@ -1,15 +1,26 @@
 import { useButtonStyles } from "@/hooks/styles/useStyles";
 import React, { ReactNode, useEffect, useRef } from "react";
-import { Animated, Pressable, View, ViewStyle } from "react-native";
+import { Animated, Pressable, Text, View, ViewStyle } from "react-native";
 
 type ButtonProps = {
   onPress: () => void;
-  children: ReactNode;
+  children?: ReactNode;
   accessibilityLabel?: string;
+  text?: string;
 };
 
-const LsButton = ({ onPress, children, accessibilityLabel }: ButtonProps) => {
+const LsButton = ({
+  onPress,
+  children,
+  accessibilityLabel,
+  text,
+}: ButtonProps) => {
   const styles = useButtonStyles();
+  if (text && children) {
+    throw new Error(
+      "Wrong use of lsButton component: Button cannot have child and text"
+    );
+  }
 
   if (styles) {
     return (
@@ -18,7 +29,9 @@ const LsButton = ({ onPress, children, accessibilityLabel }: ButtonProps) => {
         style={styles.container}
         accessibilityLabel={accessibilityLabel}
       >
-        <View style={styles.content}>{children}</View>
+        <View style={styles.content}>
+          {text ? <Text>{text}</Text> : children}
+        </View>
       </Pressable>
     );
   } else {

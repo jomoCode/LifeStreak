@@ -3,9 +3,9 @@ import CreateEvent from "@/components/ui/Template/CreateEvent";
 const EventTitle = () => {
   return (
     <CreateEvent
-      title="whats the bame of yout goal"
+      title="Enter your goal"
       field="goalTitle"
-      placeholder="e.g i read 10 page in 10 days"
+      placeholder="e.g Read 10 pages in 10 days"
     />
   );
 };
