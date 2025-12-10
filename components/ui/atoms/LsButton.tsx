@@ -7,6 +7,7 @@ type ButtonProps = {
   children?: ReactNode;
   accessibilityLabel?: string;
   text?: string;
+  length?: "short" | "long";
 };
 
 const LsButton = ({
@@ -14,8 +15,10 @@ const LsButton = ({
   children,
   accessibilityLabel,
   text,
+  length,
 }: ButtonProps) => {
   const styles = useButtonStyles();
+  const short = length === "short" ? true : false;
   if (text && children) {
     throw new Error(
       "Wrong use of lsButton component: Button cannot have child and text"
@@ -26,7 +29,7 @@ const LsButton = ({
     return (
       <Pressable
         onPress={onPress}
-        style={styles.container}
+        style={[styles.container, short ? styles.short : styles.long]}
         accessibilityLabel={accessibilityLabel}
       >
         <View style={styles.content}>
