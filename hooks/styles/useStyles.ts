@@ -103,6 +103,44 @@ export const useGeneralStyles = () => {
       width: 200,
       justifyContent: "center",
     },
+    /*
+**
+**
+  CREATE EVENT LAYOUT STYLES
+  CREATE EVENT LAYOUT STYLES
+ **
+ **
+ */
+
+    createEventLayoutContainer: { flex: 1, padding: 30 },
+    /*
+**
+**
+  CREATE EVENT HEADER STYLES
+  CREATE EVENT HEADER STYLES
+ **
+ **
+ */
+    createEventHeaderContainer: {
+      flexDirection: "row",
+      height: "20%",
+      width: "100%",
+      backgroundColor: Colors.background,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    createEventHeaderInnerContainer: {
+      flexDirection: "row",
+      alignItems: "flex-end",
+    },
+    createEventHeaderImage: { height: 60, width: 50, alignSelf: "center" },
+    createEventHeaderText: {
+      color: Colors.text,
+      fontSize: 20,
+      fontStyle: "italic",
+      fontWeight: "bold",
+    },
+    createEventHeaderInnerText: { fontSize: 25 },
   });
 };
 

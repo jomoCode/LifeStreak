@@ -1,12 +1,17 @@
-
-import { CreateStreakForm } from "@/context/useCreateStreakForm_";
+import { CreateEventLayoutHeader } from "@/components/ui/atoms/CreateEventLayoutHeader";
+import { CreateStreakForm } from "@/context/CreateStreakForm_";
+import { useGeneralStyles } from "@/hooks/styles/useStyles";
 import { Stack } from "expo-router";
-const EventCreation = () => {
+import { View } from "react-native";
+const Layout = () => {
+  const styles = useGeneralStyles();
   return (
-      <CreateStreakForm>
+    <CreateStreakForm>
+      <CreateEventLayoutHeader />
+      <View style={styles.createEventLayoutContainer}>
         <Stack screenOptions={{ headerShown: false }} />
-      </CreateStreakForm>
- 
+      </View>
+    </CreateStreakForm>
   );
 };
-export default EventCreation;
+export default Layout;
