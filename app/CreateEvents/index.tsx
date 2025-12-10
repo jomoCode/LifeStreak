@@ -1,32 +1,34 @@
-import { LsButton } from "@/components/ui/atoms/LsButton";
+import { CreateEvent } from "@/components/ui/Template/CreateEvent";
 import { CreateStreakFormProps } from "@/context/CreateStreakForm_";
 import { useGeneralStyles } from "@/hooks/styles/useStyles";
-import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React from "react";
 import { Controller, useFormContext } from "react-hook-form";
 import { Text, TextInput, View } from "react-native";
 
+const validationRules = {
+  required: true,
+  min: 3,
+  max: 50,
+};
+
 const EventTitle = () => {
-  const { control, getFieldState, watch } =
-    useFormContext<CreateStreakFormProps>();
-  const { error } = getFieldState("eventName");
   const styles = useGeneralStyles();
   const router = useRouter();
-  const moveToNextStep = () => {
+  const { control } = useFormContext<CreateStreakFormProps>();
+  const nextStep = () => {
     router.push("/CreateEvents/StartDate");
   };
 
   return (
-    <View style={styles.crePageContainer}>
-      <Text style={styles.crePageTitle}>What do you wish to achieve?</Text>
+    <CreateEvent
+      field="eventName"
+      moveToNextStep={nextStep}
+      title="What do you wish to achieve?"
+    >
       <Controller
         control={control}
-        rules={{
-          required: true,
-          min: 3,
-          max: 50,
-        }}
+        rules={validationRules}
         render={({ field: { onChange, onBlur, value } }) => (
           <View>
             <Text style={styles.crePageLabel}>Write your end result</Text>
@@ -42,17 +44,7 @@ const EventTitle = () => {
         )}
         name="eventName"
       />
-      {error && <Text>{error.message}</Text>}
-      <View style={styles.crePageButtonContainer}>
-        <LsButton onPress={moveToNextStep}>
-          <MaterialIcons
-            name="arrow-forward"
-            size={35}
-            style={styles.crePageButtonIcon}
-          />
-        </LsButton>
-      </View>
-    </View>
+    </CreateEvent>
   );
 };
 
