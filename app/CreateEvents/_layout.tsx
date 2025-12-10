@@ -1,11 +1,12 @@
-import { StreakFormProvider } from "@/context/useCreateStreakForm";
-import { Stack } from "expo-router";
 
+import { CreateStreakForm } from "@/context/useCreateStreakForm_";
+import { Stack } from "expo-router";
 const EventCreation = () => {
   return (
-    <StreakFormProvider>
-      <Stack screenOptions={{ headerShown: false }} />
-    </StreakFormProvider>
+      <CreateStreakForm>
+        <Stack screenOptions={{ headerShown: false }} />
+      </CreateStreakForm>
+ 
   );
 };
 export default EventCreation;
