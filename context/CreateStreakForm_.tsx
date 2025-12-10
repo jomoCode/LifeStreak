@@ -1,5 +1,5 @@
-import { ReactNode } from "react";
-import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
+import { ReactNode, useEffect } from "react";
+import { FormProvider, useForm } from "react-hook-form";
 
 export type CreateStreakFormProps = {
   interval: number;
@@ -22,9 +22,10 @@ export const CreateStreakForm = ({ children }: CreateStreakFormKids) => {
       startTime: "",
     },
   });
-  // const onSubmit: SubmitHandler<CreateStreakFormProps> = (data) =>
-  //   console.log(data);
 
-  return <FormProvider {...methods}>
-    {children}</FormProvider>;
+  useEffect(() => {
+    const eventName = methods.watch("eventName");
+    console.log("Event Name Changed:", eventName);
+  }, [methods]);
+  return <FormProvider {...methods}>{children}</FormProvider>;
 };
