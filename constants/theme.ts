@@ -5,11 +5,12 @@
 
 import { Platform } from "react-native";
 
-const tintColorLight = "#0a7ea4";
-const tintColorDark = "#fff";
+const tintColorLight = "#0a7da432";
+const tintColorDark = "#05364732";
 
 export const Colors = {
   light: {
+    button: "#4892c4ff",
     buttonTomato: "#073893ff",
     text: "#ffffffff",
     background: "#126298ff",
@@ -21,6 +22,7 @@ export const Colors = {
     border: "#a8a7a7ff",
   },
   dark: {
+    button: "#306385ff",
     text: "#ECEDEE",
     buttonTomato: "#541313ff",
     background: "#004159ff",

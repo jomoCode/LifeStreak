@@ -141,6 +141,36 @@ export const useGeneralStyles = () => {
       fontWeight: "bold",
     },
     createEventHeaderInnerText: { fontSize: 25 },
+
+    /*
+**
+  CREATE EVENT GENERAL STYLES
+  CREATE EVENT GENERAL STYLES
+ **
+ */
+    crePageContainer: { gap: 10 },
+    crePageTitle: { fontSize: 18, textAlign: "center" },
+    crePageLabel: {
+      fontWeight: "bold",
+      fontSize: 20,
+      color: Colors.background,
+    },
+    crePageInput: {
+      fontSize: 18,
+      backgroundColor: Colors.tint,
+      borderRadius: 8,
+      padding: 10,
+    },
+    crePageButtonIcon: {
+      color: Colors.text,
+    },
+    crePageButtonContainer: {
+      flexDirection: "column",
+      justifyContent: "flex-end",
+      alignItems: "flex-end",
+      width: "100%",
+      height: "70%",
+    },
   });
 };
 
@@ -253,8 +283,10 @@ export const useButtonStyles = () => {
       height: 60,
       borderWidth: 3,
       borderColor: Colors.border,
-      backgroundColor: Colors.buttonTomato,
+      backgroundColor: Colors.button,
     },
+    short: { width: 120 },
+    long: { width: "100%" },
     content: { width: "100%", justifyContent: "center", alignItems: "center" },
     text: {
       color: Colors.text,
