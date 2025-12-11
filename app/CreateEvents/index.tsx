@@ -8,8 +8,8 @@ import { Text, TextInput, View } from "react-native";
 
 const validationRules = {
   required: true,
-  min: 3,
-  max: 50,
+  minLength: 3,
+  maxLength: 50,
 };
 
 const EventTitle = () => {

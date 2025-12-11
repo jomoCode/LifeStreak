@@ -32,9 +32,7 @@ const CreateEvent = ({
   return (
     <View style={styles.crePageContainer}>
       <Text style={styles.crePageTitle}>{title}</Text>
-
-      {children}
-
+      <View style={{ flex: 1 }}>{children}</View>
       {error && <Text>{error.message}</Text>}
       <View style={styles.crePageButtonContainer}>
         <LsButton

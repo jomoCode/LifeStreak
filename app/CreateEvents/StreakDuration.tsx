@@ -12,7 +12,7 @@ const validationRules = {
   max: 50,
 };
 
-const EventTitle = () => {
+const StreakDuration = () => {
   const styles = useGeneralStyles();
   const router = useRouter();
   const { control, getValues, setValue } =
@@ -58,4 +58,4 @@ const EventTitle = () => {
   );
 };
 
-export default EventTitle;
+export default StreakDuration;

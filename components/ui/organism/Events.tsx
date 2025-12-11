@@ -81,7 +81,7 @@ export const Events = () => {
       )}
       <ActionButton
         handleSubmit={() => {
-          router.push("/CreateEvents/StartDate");
+          router.push("/CreateEvents");
         }}
       />
     </View>
