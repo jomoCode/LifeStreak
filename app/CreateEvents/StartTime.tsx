@@ -17,25 +17,43 @@ const StartTimeScreen = () => {
   const [calendar, setCalendar] = useState(false);
   const router = useRouter();
   const color = useColors();
-  const { setValue } = useFormContext<CreateStreakFormProps>();
+  const [err, setErr] = useState<string | null>(null);
+  const { setValue, getValues } = useFormContext<CreateStreakFormProps>();
   const styles = useGeneralStyles();
   const setDate = (event: DateTimePickerEvent, date?: Date) => {
-    if (!date) {
-      console.error("No date selected: ");
-      return null;
+    try {
+      // Validate props
+      if (!date) throw new Error("No date selected: ");
+      if (date) setCalendarValue(date);
+      // Clean up states
+      setCalendar(false);
+      setErr(null);
+      // Format date
+      const time = date.toLocaleTimeString().toString();
+      const timeArray = time.split(":");
+      if (timeArray[0].length === 1) timeArray[0] = "0" + timeArray[0];
+      const formattedTime = `${timeArray[0]}:${timeArray[1]}`;
+      // Update form state
+      setValue("startTime", formattedTime);
+    } catch (error: unknown | Error) {
+      const errorObj = error as Error;
+      setErr(errorObj?.message);
     }
-    if (date) setCalendarValue(date);
-    setCalendar(false);
-    const time = date.toLocaleTimeString().toString();
-    const timeArray = time.split(":");
-    if (timeArray[0].length === 1) timeArray[0] = "0" + timeArray[0];
-    const formattedTime = `${timeArray[0]}:${timeArray[1]}`;
-    console.log("final selected time: ", formattedTime);
-    setValue("startTime", formattedTime);
   };
 
-  const nextStep =() => {
-    router.push('/CreateEvents/StreakDuration')
+  const nextStep = () => {
+    const startTime = getValues("startTime");
+    if (!startTime || startTime.length < 4) {
+      setErr("Start date is required");
+      return;
+    }
+
+    if (startTime[2] !== ":") {
+      setErr("App error, please restart app");
+      return;
+    }
+
+   if (!err) router.push("/CreateEvents/StreakDuration");
   };
   return (
     <CreateEvent title="What time?" moveToNextStep={nextStep} field="startTime">
@@ -61,13 +79,15 @@ const StartTimeScreen = () => {
         </Text>
       </Text>
       <Text>
-        {calendarValue && (
+        {calendarValue && !err ? (
           <MaterialCommunityIcons
             name="check-outline"
             color={color.background}
             size={25}
             style={{ textAlign: "center" }}
           />
+        ) : (
+          <Text style={{ color: "red" }}>{err}</Text>
         )}
       </Text>
     </CreateEvent>
