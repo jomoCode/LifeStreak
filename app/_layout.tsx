@@ -1,5 +1,4 @@
-import { Stack } from "expo-router";
-import { StatusBar } from "expo-status-bar";
+import { Slot, Stack } from "expo-router";
 import "react-native-reanimated";
 
 import { IconSymbol } from "@/components/ui/icon-symbol";
@@ -34,10 +33,11 @@ export default function RootLayout() {
   return (
     <LsThemeProvider>
       <PaperProvider>
-        <SafeAreaView style={{flex:1}}>
-          <Stack screenOptions={{ headerShown: false }} />
-          <StatusBar style="auto" />
-        </SafeAreaView>
+        <Stack screenOptions={{ headerShown: false }}>
+          <SafeAreaView style={{ flex: 1 }}>
+            <Slot />
+          </SafeAreaView>
+        </Stack>
       </PaperProvider>
     </LsThemeProvider>
   );

@@ -31,9 +31,12 @@ const CreateEvent = ({
   const styles = useGeneralStyles();
   return (
     <View style={styles.crePageContainer}>
-      <Text style={styles.crePageTitle}>{title}</Text>
-      <View style={{ flex: 1 }}>{children}</View>
-      {error && <Text>{error.message}</Text>}
+      <View style={{ minHeight: 100 }}>
+        <Text style={styles.crePageTitle}>{title}</Text>
+        <View style={{ flex: 1, marginTop:20, }}>{children}</View>
+        {error && <Text>{error.message}</Text>}
+      </View>
+
       <View style={styles.crePageButtonContainer}>
         <LsButton
           onPress={() => {

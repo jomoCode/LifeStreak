@@ -26,7 +26,7 @@ const StartTimeScreen = () => {
     }
     if (date) setCalendarValue(date);
     setCalendar(false);
-    const time = date.getTime().toString();
+    const time = date.toLocaleTimeString().toString();
     const timeArray = time.split(":");
     if (timeArray[0].length === 1) timeArray[0] = "0" + timeArray[0];
     const formattedTime = `${timeArray[0]}:${timeArray[1]}`;

@@ -148,11 +148,18 @@ export const useGeneralStyles = () => {
   CREATE EVENT GENERAL STYLES
  **
  */
-    crePageContainer: { gap: 10, maxHeight:'100%' },
+    crePageContainer: {
+      flex: 1,
+      flexDirection: "column",
+      maxHeight: "100%",
+      justifyContent: "space-between",
+      paddingBottom: 20,
+    },
     crePageTitle: { fontSize: 18, textAlign: "center" },
     crePageLabel: {
       fontWeight: "bold",
       fontSize: 20,
+      marginBottom:5,
       color: Colors.background,
     },
     crePageInput: {
@@ -169,7 +176,6 @@ export const useGeneralStyles = () => {
       justifyContent: "flex-end",
       alignItems: "flex-end",
       width: "100%",
-      height: "70%",
     },
   });
 };
