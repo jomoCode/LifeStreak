@@ -23,10 +23,11 @@ const intervalOptions = [
   { label: "Weekly", value: 7 },
 ];
 
-const StreakDuration = () => {
+const StreakInterval = () => {
   const [showPicker, setShowPicker] = useState(false);
   const [picked, setPicked] = useState<string>();
   const styles = useGeneralStyles();
+  const [err, setErr] = useState<string | null>(null);
   const router = useRouter();
   const { getValues, setValue } = useFormContext<CreateStreakFormProps>();
   const handleSelect = (value: number) => {
@@ -35,15 +36,21 @@ const StreakDuration = () => {
     setPicked(`${value} days interval selected`);
   };
   const nextStep = () => {
-    // Validate value
-    const value = Number(getValues("interval"));
-    if (typeof value != "number")
-      throw new Error("duration should be a number");
-    if (!value || value < 1) throw new Error("interval must be atleast 1 days");
-    if (value > 7) throw new Error("interval must be at most 7 days");
-    // Update value with validated value before routing
-    setValue("interval", value);
-    router.push("/CreateEvents/TimesPerDay");
+    try {
+      // Validate value
+      const value = Number(getValues("interval"));
+      if (typeof value != "number")
+        throw new Error("duration should be a number");
+      if (!value || value < 1)
+        throw new Error("interval must be atleast 1 days");
+      if (value > 7) throw new Error("interval must be at most 7 days");
+      // Update value with validated value before routing
+      setValue("interval", value);
+      router.push("/CreateEvents/TimesPerDay");
+    } catch (error: unknown | Error) {
+      const errorObj = error as Error;
+      setErr(errorObj?.message);
+    }
   };
 
   return (
@@ -66,6 +73,8 @@ const StreakDuration = () => {
         </Text>
       </Pressable>
       {!showPicker && picked && <Text style={styles.title}>{picked}</Text>}
+
+      {err && <Text style={{ color: "red" }}>{err}</Text>}
       <View style={{ minHeight: 250 }}>
         {showPicker && (
           <FlatList
@@ -84,4 +93,4 @@ const StreakDuration = () => {
   );
 };
 
-export default StreakDuration;
+export default StreakInterval;
