@@ -1,4 +1,4 @@
-import { ReactNode, useEffect } from "react";
+import { ReactNode } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
 export type CreateStreakFormProps = {
@@ -14,18 +14,13 @@ type CreateStreakFormKids = { children: ReactNode };
 export const CreateStreakForm = ({ children }: CreateStreakFormKids) => {
   const methods = useForm<CreateStreakFormProps>({
     defaultValues: {
-      duration: 0,
+      duration: -1,
       eventName: "",
-      interval: 0,
-      noOfTimes: 0,
+      interval: -1,
+      noOfTimes: -1,
       startDate: "",
       startTime: "",
     },
   });
-
-  useEffect(() => {
-    const eventName = methods.watch("eventName");
-    console.log("Event Name Changed:", eventName);
-  }, [methods]);
   return <FormProvider {...methods}>{children}</FormProvider>;
 };
