@@ -148,7 +148,7 @@ export const useGeneralStyles = () => {
   CREATE EVENT GENERAL STYLES
  **
  */
-    crePageContainer: { gap: 10 },
+    crePageContainer: { gap: 10, maxHeight:'100%' },
     crePageTitle: { fontSize: 18, textAlign: "center" },
     crePageLabel: {
       fontWeight: "bold",
