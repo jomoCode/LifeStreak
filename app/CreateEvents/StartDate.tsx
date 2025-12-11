@@ -15,20 +15,33 @@ import { Text } from "react-native";
 const StartDateScreen = () => {
   const [calendarValue, setCalendarValue] = useState<Date>();
   const [calendar, setCalendar] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
   const router = useRouter();
   const color = useColors();
-  const { setValue } = useFormContext<CreateStreakFormProps>();
+  const { setValue, getValues } = useFormContext<CreateStreakFormProps>();
   const styles = useGeneralStyles();
   const setDate = (event: DateTimePickerEvent, date?: Date) => {
-    if (!date) {
-      console.error("No date selected: ");
-      return null;
+    try {
+      // Validate props
+      if (!date) throw new Error("No date selected");
+      if (date) setCalendarValue(date);
+
+      // Update form states
+      setCalendar(false);
+      setErr(null);
+      setValue("startDate", date.toISOString().split("T")[0]);
+    } catch (error: unknown | Error) {
+      const errorObj = error as Error;
+      setErr(errorObj?.message);
     }
-    if (date) setCalendarValue(date);
-    setCalendar(false);
-    setValue("startDate", date.toISOString().split("T")[0]);
   };
   const nextStep = () => {
+    const startDate = getValues("startDate");
+    // validare form values
+    if (!startDate || startDate.length < 4) {
+      setErr("Start date is required");
+      return;
+    }
     router.push("/CreateEvents/StartTime");
   };
   return (
@@ -61,13 +74,15 @@ const StartDateScreen = () => {
         </Text>
       </Text>
       <Text>
-        {calendarValue && (
+        {calendarValue && !err ? (
           <MaterialCommunityIcons
             name="check-outline"
             color={color.background}
             size={25}
             style={{ textAlign: "center" }}
           />
+        ) : (
+          <Text style={{ color: "red" }}>{err}</Text>
         )}
       </Text>
     </CreateEvent>
