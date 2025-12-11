@@ -1,100 +1,90 @@
 import { LsButton } from "@/components/ui/atoms/LsButton";
-import { useStreakForm } from "@/context/useCreateStreakForm";
-import { useRouter } from "expo-router";
+import { CreateStreakFormProps } from "@/context/CreateStreakForm_";
+import { useGeneralStyles } from "@/hooks/styles/useStyles";
+import { useColors } from "@/hooks/useColors";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import React from "react";
-import { ScrollView, StyleSheet, Text, View, Alert } from "react-native";
+import { useFormContext } from "react-hook-form";
+import { Text, View } from "react-native";
 
-export default function ReviewScreen() {
-  const streak = useStreakForm();
-  const router = useRouter();
-
-  const handleSubmit = () => {
-    streak.submit((values) => {
-      // Here you would handle the final submission, e.g., API call or database insert
-      Alert.alert("Success", "Streak created successfully!", [
-        { text: "OK", onPress: () => router.push("/") }, // Redirect to home or list
-      ]);
-      streak.resetForm(); // Optional: clear the form
-    });
-  };
-
-  const reviewItems = [
-    { label: "Goal Title", value: streak.form.goalTitle },
-    { label: "Start Date", value: streak.form.startDate },
-    { label: "Start Time", value: streak.form.startTime ?? "Not set" },
-    { label: "Interval (days)", value: streak.form.interval },
-    { label: "Duration (days)", value: streak.form.duration },
-    { label: "Times per day", value: streak.form.timesPerDay },
-  ];
-
+const ReviewScreen = () => {
+  const { getValues, handleSubmit,  } = useFormContext<CreateStreakFormProps>();
+  const styles = useGeneralStyles();
+  const colors = useColors();
+  const duration = getValues("duration");
+  const goal = getValues("eventName");
+  const timesPerDay = getValues("noOfTimes");
+  const interval = getValues("interval");
+  const startDay = getValues("startDate");
+  const startTime = getValues("startTime");
+  const submit = () => {
+    handleSubmit()
+  }
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.header}>Review Streak</Text>
+    <View
+      style={{
+        flex: 1,
+        flexDirection: "column",
+        paddingVertical: 10,
+        justifyContent: "space-between",
+      }}
+    >
+      <View>
+        <Text style={styles.crePageLabel}>
+          <Text style={{ color: colors.button }}>{duration} days</Text> from
+          now,{" "}
+          <Text style={{ color: colors.button, display: "none" }}>{goal}</Text>{" "}
+          will be yours.
+        </Text>
 
-      {reviewItems.map((item) => (
-        <View key={item.label} style={styles.item}>
-          <Text style={styles.label}>{item.label}</Text>
-          <Text style={styles.value}>{String(item.value)}</Text>
+        <Text style={{ fontSize: 18, fontWeight: "600", marginTop: 12 }}>
+          Build your streak:
+        </Text>
+        <View style={{ gap: 8, marginLeft: 4 }}>
+          <Text style={{ fontSize: 18, lineHeight: 22 }}>
+            <MaterialCommunityIcons
+              name="circle"
+              color={colors.button}
+              size={12}
+            />{" "}
+            {timesPerDay} daily check-in{timesPerDay > 1 ? "s" : ""}
+          </Text>
+          <Text style={{ fontSize: 16, lineHeight: 22 }}>
+            <MaterialCommunityIcons
+              name="circle"
+              color={colors.button}
+              size={12}
+            />{" "}
+            {interval === 1 ? "Daily" : `Every ${interval} days`}
+          </Text>
+          <Text style={{ fontSize: 16, lineHeight: 22 }}>
+            <MaterialCommunityIcons
+              name="circle"
+              color={colors.button}
+              size={12}
+            />{" "}
+            First check-in:{" "}
+            <Text style={{ color: colors.button, fontWeight: "bold" }}>
+              {new Date(startDay).toDateString()}
+            </Text>{" "}
+            -{" "}
+            <Text style={{ color: colors.button, fontWeight: "bold" }}>
+              {startTime}
+            </Text>
+          </Text>
         </View>
-      ))}
+      </View>
 
-      <LsButton onPress={handleSubmit}>
-        <Text style={styles.buttonText}>Submit Streak</Text>
-      </LsButton>
-
-      <LsButton onPress={() => router.back()}>
-        <Text style={styles.buttonText}>Back</Text>
-      </LsButton>
-    </ScrollView>
+      <View style={{ marginTop: 16, width: "100%" }}>
+        <LsButton onPress={submit} length="long">
+          <Text style={{ fontSize: 16, fontWeight: "700", color: "white" }}>
+            Start my streak{" "}
+            <MaterialCommunityIcons name="fire" size={20} color="yellow" />
+          </Text>
+        </LsButton>
+      </View>
+    </View>
   );
-}
+};
 
-const styles = StyleSheet.create({
-  container: {
-    padding: 20,
-    backgroundColor: "#f8fafc",
-    flexGrow: 1,
-  },
-  header: {
-    fontSize: 22,
-    fontWeight: "700",
-    marginBottom: 20,
-    textAlign: "center",
-    color: "#1e293b",
-  },
-  item: {
-    marginBottom: 16,
-    padding: 12,
-    backgroundColor: "#fff",
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "#cbd5e1",
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: "#334155",
-    marginBottom: 4,
-  },
-  value: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#1e293b",
-  },
-  button: {
-    marginTop: 24,
-    backgroundColor: "#1e40af",
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: "center",
-  },
-  backButton: {
-    backgroundColor: "#64748b",
-    marginTop: 12,
-  },
-  buttonText: {
-    color: "#fff",
-    fontWeight: "600",
-    fontSize: 16,
-  },
-});
+export default ReviewScreen;
