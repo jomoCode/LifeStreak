@@ -15,8 +15,12 @@ const validationRules = {
 const EventTitle = () => {
   const styles = useGeneralStyles();
   const router = useRouter();
-  const { control } = useFormContext<CreateStreakFormProps>();
+  const { control, getValues } = useFormContext<CreateStreakFormProps>();
   const nextStep = () => {
+    const event = getValues('eventName');
+    if (!event) throw new Error('Streak title is required');
+    if (event.length <= 1) throw new Error('streak title must be atleast 4 characters long');
+    if (event.length > 50) throw new Error('Event name must be most 50 characters long')
     router.push("/CreateEvents/StartDate");
   };
 
