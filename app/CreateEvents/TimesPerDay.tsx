@@ -2,7 +2,7 @@ import { CreateEvent } from "@/components/ui/Template/CreateEvent";
 import { CreateStreakFormProps } from "@/context/CreateStreakForm_";
 import { useGeneralStyles } from "@/hooks/styles/useStyles";
 import { useRouter } from "expo-router";
-import React from "react";
+import React, { useState } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 import { Text, TextInput, View } from "react-native";
 
@@ -15,18 +15,26 @@ const validationRules = {
 const TimesPerDayScreen = () => {
   const styles = useGeneralStyles();
   const router = useRouter();
+  const [err, setErr] = useState<string | null>(null);
   const { control, getValues, setValue } =
     useFormContext<CreateStreakFormProps>();
   const nextStep = () => {
-    // Validate value
-    const value = Number(getValues("duration"));
-    if (typeof value != "number")
-      throw new Error("duration should be a number");
-    if (!value || value <= 0) throw new Error("streak must be atleast 1 days");
-    if (value > 12) throw new Error("Streak must be at most 12 times per days");
-    // Update value with validated value before routing
-    setValue("duration", value);
-    router.push("/CreateEvents/Review");
+    try {
+      // Validate value
+      const value = Number(getValues("duration"));
+      if (typeof value != "number")
+        throw new Error("duration should be a number");
+      if (!value || value <= 0)
+        throw new Error("streak must be atleast 1 days");
+      if (value > 12)
+        throw new Error("Streak must be at most 12 times per days");
+      // Update value with validated value before routing
+      setValue("duration", value);
+      router.push("/CreateEvents/Review");
+    } catch (error: unknown | Error) {
+      const errorObj = error as Error;
+      setErr(errorObj?.message);
+    }
   };
 
   return (
@@ -40,7 +48,9 @@ const TimesPerDayScreen = () => {
         rules={validationRules}
         render={({ field: { onChange, onBlur, value } }) => (
           <View>
-            <Text style={styles.crePageLabel}>How many will you attend to this goal per day</Text>
+            <Text style={styles.crePageLabel}>
+              How many will you attend to this goal per day
+            </Text>
             <TextInput
               placeholder="Eg: 3"
               onBlur={onBlur}
@@ -50,6 +60,8 @@ const TimesPerDayScreen = () => {
               multiline={false}
               style={styles.crePageInput}
             />
+
+            {err && <Text style={{ color: "red" }}>{err}</Text>}
           </View>
         )}
         name="noOfTimes"
