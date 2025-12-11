@@ -1,18 +1,20 @@
 import { useActionButtonStyles } from "@/hooks/styles/useStyles";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import React from "react";
-import { Pressable, View } from "react-native";
+import { Pressable, View, ViewStyle } from "react-native";
 
-type ActionButtonTypes ={
+type ActionButtonTypes = {
   handleSubmit: () => void;
-} 
+  containerStyles?: ViewStyle;
+};
 
 export const ActionButton = ({
   handleSubmit,
-}:ActionButtonTypes ) => {
+  containerStyles,
+}: ActionButtonTypes) => {
   const styles = useActionButtonStyles();
   return (
-    <View style={styles.modalButtonContainer}>
+    <View style={[styles.modalButtonContainer, containerStyles]}>
       <Pressable
         style={styles.modalButton}
         onPress={handleSubmit}
