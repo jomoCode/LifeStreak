@@ -7,6 +7,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import DateTimePicker, {
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
+import { useRouter } from "expo-router";
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { Text } from "react-native";
@@ -14,6 +15,7 @@ import { Text } from "react-native";
 const StartDateScreen = () => {
   const [calendarValue, setCalendarValue] = useState<Date>();
   const [calendar, setCalendar] = useState(false);
+  const router = useRouter();
   const color = useColors();
   const { setValue } = useFormContext<CreateStreakFormProps>();
   const styles = useGeneralStyles();
@@ -26,10 +28,13 @@ const StartDateScreen = () => {
     setCalendar(false);
     setValue("startDate", date.toISOString().split("T")[0]);
   };
+  const nextStep = () => {
+    router.push("/CreateEvents/StartTime");
+  };
   return (
     <CreateEvent
       title="When do you plan to begin"
-      moveToNextStep={() => ""}
+      moveToNextStep={nextStep}
       field="startDate"
     >
       {!calendar ? (
