@@ -5,7 +5,7 @@ The app is designed with a scalable **atomic component architecture**, promoting
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### 1️⃣ Install Dependencies
 
@@ -35,7 +35,7 @@ Page	The full user-facing screen (route-level component).	CreateEventScreen that
 
 🧾 React Hook Form + Yup — Form handling and validation
 
-💾 Expo File System — Local storage for event data
+💾 Sqlite — Local storage for event data
 
 🧱 Atomic Design Pattern — For scalable and maintainable UI structure
 
