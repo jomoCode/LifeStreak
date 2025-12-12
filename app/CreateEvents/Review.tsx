@@ -2,24 +2,91 @@ import { LsButton } from "@/components/ui/atoms/LsButton";
 import { CreateStreakFormProps } from "@/context/CreateStreakForm_";
 import { useGeneralStyles } from "@/hooks/styles/useStyles";
 import { useColors } from "@/hooks/useColors";
+import {
+  cleanFileName,
+  getTodayMidnightUTC,
+  runSql,
+} from "@/lib/generic_helpers";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import React from "react";
-import { useFormContext } from "react-hook-form";
-import { Text, View } from "react-native";
+import { SubmitHandler, useFormContext } from "react-hook-form";
+import { Alert, Text, View } from "react-native";
 
 const ReviewScreen = () => {
-  const { getValues, handleSubmit,  } = useFormContext<CreateStreakFormProps>();
+  const { getValues, handleSubmit, reset } =
+    useFormContext<CreateStreakFormProps>();
   const styles = useGeneralStyles();
   const colors = useColors();
+  const router = useRouter();
   const duration = getValues("duration");
   const goal = getValues("eventName");
   const timesPerDay = getValues("noOfTimes");
   const interval = getValues("interval");
   const startDay = getValues("startDate");
   const startTime = getValues("startTime");
-  const submit = () => {
-    handleSubmit()
-  }
+
+  const submit: SubmitHandler<CreateStreakFormProps> = async (data) => {
+    // convert and normalize
+    const fixedData = {
+      ...data,
+      interval: Number(data.interval),
+      duration: Number(data.duration),
+      noOfTimes: Number(data.noOfTimes),
+    };
+
+    // Convert startDate to midnight UTC only ONCE
+    const startDateISO = getTodayMidnightUTC(fixedData.startDate);
+
+    // Convert startTime properly:
+    const startTimeISO = new Date(startDateISO);
+    const [hour, minute] = fixedData.startTime.split(":");
+    startTimeISO.setUTCHours(Number(hour));
+    startTimeISO.setUTCMinutes(Number(minute));
+    startTimeISO.setUTCSeconds(0);
+    startTimeISO.setUTCMilliseconds(0);
+
+    fixedData.startDate = startDateISO;
+    fixedData.startTime = startTimeISO.toISOString();
+
+    const event_id = `${cleanFileName(fixedData.eventName)}_${Date.now()}`;
+
+    try {
+      await runSql(
+        `INSERT INTO events (
+        event_id, event_name, startDate, startTime, interval, duration,
+        No_of_times_checked, No_of_times_to_be_checked, expired, last_checked
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          event_id,
+          fixedData.eventName,
+          fixedData.startDate,
+          fixedData.startTime,
+          fixedData.interval,
+          fixedData.duration,
+          Number(0),
+          Number(fixedData.noOfTimes),
+          Number(0),
+          getTodayMidnightUTC(),
+        ]
+      );
+
+      Alert.alert("Success", "Event created successfully!", [
+        {
+          text: "Continue",
+          onPress: () => {
+            router.push("/");
+          },
+          style: "default",
+        },
+      ]);
+      reset();
+    } catch (error) {
+      console.error("Error creating event:", error);
+      Alert.alert("Error", "Failed to create event");
+    }
+  };
+
   return (
     <View
       style={{
@@ -76,7 +143,12 @@ const ReviewScreen = () => {
       </View>
 
       <View style={{ marginTop: 16, width: "100%" }}>
-        <LsButton onPress={submit} length="long">
+        <LsButton
+          onPress={async () => {
+            handleSubmit(submit)();
+          }}
+          length="long"
+        >
           <Text style={{ fontSize: 16, fontWeight: "700", color: "white" }}>
             Start my streak{" "}
             <MaterialCommunityIcons name="fire" size={20} color="yellow" />
