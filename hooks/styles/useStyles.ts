@@ -189,6 +189,12 @@ export const useGeneralStyles = () => {
       backgroundColor: Colors.button,
       padding: 2,
       borderRadius: 10,
+      overflow: "hidden",
+      shadowColor: "#000",
+      shadowOffset: { width: 1, height: 2 },
+      shadowOpacity: 0.25,
+      shadowRadius: 10,
+      elevation: 4,
     },
     LsGoalContaninerMain: {
       flex: 1,
@@ -339,7 +345,7 @@ export const useActionButtonStyles = () => {
       padding: 20,
     },
     modalButton: {
-      backgroundColor: color.background,
+      backgroundColor: color.button,
       justifyContent: "center",
       alignItems: "center",
       width: 60,
@@ -362,6 +368,18 @@ export const useTextStyles = () => {
       color: colors.text,
       fontWeight: "condensedBold",
       fontFamily: "Bangers-Regular",
+    },
+  });
+};
+
+export const useScreenStyles = () => {
+  const Colors = useColors();
+
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: Colors.background,
+      padding: 20,
     },
   });
 };

@@ -1,19 +1,18 @@
+import { useScreenStyles } from "@/hooks/styles/useStyles";
 import { Event as EventType, readEvents } from "@/lib/CRUDE_sqlite";
 import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
-import { FlatList, RefreshControl, StyleSheet, Text, View } from "react-native";
+import { FlatList, RefreshControl, Text, View } from "react-native";
 import { ActionButton } from "../atoms/ActionButton";
-import { EventListItem } from "../molecules/EventListItem";
-/**
- * Organism: Events
- * Handles fetching, rendering, and refreshing all stored events.
- */
+import { Title } from "../atoms/Title";
+import { LsGoal } from "../molecules/LsGoal";
+
 export const Events = () => {
   const [data, setData] = useState<EventType[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const router = useRouter();
-
+  const styles = useScreenStyles();
   const loadEventsFromDb = useCallback(async () => {
     try {
       setLoading(true);
@@ -40,7 +39,7 @@ export const Events = () => {
           return;
         }
       }
-
+      console.log("my events: ", events);
       setData(events);
     } catch (err) {
       console.error("Error loading events:", err);
@@ -62,17 +61,21 @@ export const Events = () => {
 
   return (
     <View style={styles.container}>
+      <Title variant="lg">Goals</Title>
       {loading && data.length === 0 ? (
-        <Text style={styles.message}>Loading events...</Text>
+        <Text>Loading events...</Text>
       ) : (
         <FlatList
           data={data}
           keyExtractor={(item) => item.event_id}
           renderItem={({ item }) => (
-            <EventListItem item={item} onEventUpdated={loadEventsFromDb} />
+            <LsGoal
+              streakName={item.event_name}
+              onPress={() => "route to next screen with event id"}
+            />
           )}
           ListEmptyComponent={
-            <Text style={styles.message}>No events found</Text>
+            <Title variant="lg">Create a goal to start your streak</Title>
           }
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -87,17 +90,3 @@ export const Events = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingTop: 30,
-    backgroundColor: "#f0f0f0",
-  },
-  message: {
-    textAlign: "center",
-    padding: 20,
-    fontSize: 16,
-    color: "gray",
-  },
-});
