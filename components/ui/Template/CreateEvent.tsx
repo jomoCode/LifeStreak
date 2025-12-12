@@ -34,7 +34,6 @@ const CreateEvent = ({
       <View style={{ minHeight: 100 }}>
         <Text style={styles.crePageTitle}>{title}</Text>
         <View style={{ flex: 1, marginTop:20, }}>{children}</View>
-        {error && <Text>{error.message}</Text>}
       </View>
 
       <View style={styles.crePageButtonContainer}>
