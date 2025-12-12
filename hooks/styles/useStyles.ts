@@ -186,6 +186,7 @@ export const useOnboardingStyles = () => {
   return StyleSheet.create({
     container: {
       flex: 1,
+      paddingVertical:20,
       backgroundColor: Colors.background,
       justifyContent: "center",
       alignItems: "center",

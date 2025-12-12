@@ -34,7 +34,7 @@ export default function RootLayout() {
     <LsThemeProvider>
       <PaperProvider>
         <Stack screenOptions={{ headerShown: false }}>
-          <SafeAreaView style={{ flex: 1 }}>
+          <SafeAreaView>
             <Slot />
           </SafeAreaView>
         </Stack>

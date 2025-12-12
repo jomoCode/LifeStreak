@@ -84,7 +84,6 @@ const OnboardingScreen = () => {
     })();
   }, []);
 
-  
   const onViewableItemsChanged = React.useCallback(
     ({ viewableItems }: ViewAbleItems) => {
       const ViewableItem = viewableItems[0].index;
@@ -113,6 +112,7 @@ const OnboardingScreen = () => {
                 resizeMode="contain"
               />
               <LsButton
+                length="short"
                 onPress={() => {
                   handleSkip(router);
                 }}
@@ -154,6 +154,7 @@ const OnboardingScreen = () => {
 
       <View style={styles.buttonContainer}>
         <LsButton
+          length="short"
           onPress={() => {
             if (currentIndex >= 1) {
               try {
@@ -168,7 +169,7 @@ const OnboardingScreen = () => {
         >
           <MaterialIcons name="arrow-back" size={35} color={colors.text} />
         </LsButton>
-        <LsButton onPress={handleNext}>
+        <LsButton onPress={handleNext} length="short">
           <MaterialIcons name="arrow-forward" size={35} color={colors.text} />
         </LsButton>
       </View>
