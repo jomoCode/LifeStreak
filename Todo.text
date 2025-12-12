@@ -1,0 +1,13 @@
+1. setup basic goal list page
+- design the goal tablet
+- design the goal list page
+- create functions for filtering based on name and Date
+ 
+
+
+1. Create an alert component for error warning and success popups.
+2. User should be able to exit event creation screen at any point in time... close button
+3. Date and time screen should show previous value if user returns back to them to make corrections
+4. Work on the copy for creating an event.
+5. Back button for easy scrolling foward and backward across screens.
+6. 
