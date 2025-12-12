@@ -1,8 +1,9 @@
 1. setup basic goal list page
-- design the goal tablet
-- design the goal list page
++ design the goal tablet
++ design the goal list page
+- move date fetching to context
 - create functions for filtering based on name and Date
- 
+- postponed: update empty goal list to show unlit firewood with text.. Set a goal to  get your flames burning. 
 
 
 1. Create an alert component for error warning and success popups.
