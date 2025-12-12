@@ -1,61 +1,20 @@
+import { useDb } from "@/context/useBackend";
 import { useScreenStyles } from "@/hooks/styles/useStyles";
-import { Event as EventType, readEvents } from "@/lib/CRUDE_sqlite";
 import { useRouter } from "expo-router";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useState } from "react";
 import { FlatList, RefreshControl, Text, View } from "react-native";
 import { ActionButton } from "../atoms/ActionButton";
 import { Title } from "../atoms/Title";
 import { LsGoal } from "../molecules/LsGoal";
 
 export const Events = () => {
-  const [data, setData] = useState<EventType[]>([]);
-  const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const router = useRouter();
+  const { data, loading, refresh } = useDb();
   const styles = useScreenStyles();
-  const loadEventsFromDb = useCallback(async () => {
-    try {
-      setLoading(true);
-      const events = await readEvents();
-
-      if (!events) {
-        setData([]);
-        return;
-      }
-
-      if (typeof events === "object") {
-        if ("error" in events) {
-          console.error("Error reading events:", events.error);
-          setData([]);
-          return;
-        }
-        if ("fail" in events) {
-          setData([]);
-          return;
-        }
-        if ("pass" in events) {
-          console.log("Pass message:", events.pass);
-          setData([]);
-          return;
-        }
-      }
-      console.log("my events: ", events);
-      setData(events);
-    } catch (err) {
-      console.error("Error loading events:", err);
-      setData([]);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    loadEventsFromDb();
-  }, [loadEventsFromDb]);
-
   const onRefresh = async () => {
     setRefreshing(true);
-    await loadEventsFromDb();
+    refresh();
     setRefreshing(false);
   };
 

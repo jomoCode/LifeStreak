@@ -3,6 +3,7 @@ import "react-native-reanimated";
 
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { Colors } from "@/constants/theme";
+import { DbProvider } from "@/context/useBackend";
 import { LsThemeProvider } from "@/context/useTheme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import * as Font from "expo-font";
@@ -33,11 +34,13 @@ export default function RootLayout() {
   return (
     <LsThemeProvider>
       <PaperProvider>
-        <Stack screenOptions={{ headerShown: false }}>
-          <SafeAreaView>
-            <Slot />
-          </SafeAreaView>
-        </Stack>
+        <DbProvider>
+          <Stack screenOptions={{ headerShown: false }}>
+            <SafeAreaView>
+              <Slot />
+            </SafeAreaView>
+          </Stack>
+        </DbProvider>
       </PaperProvider>
     </LsThemeProvider>
   );
