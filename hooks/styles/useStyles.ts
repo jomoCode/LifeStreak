@@ -159,7 +159,7 @@ export const useGeneralStyles = () => {
     crePageLabel: {
       fontWeight: "bold",
       fontSize: 20,
-      marginBottom:5,
+      marginBottom: 5,
       color: Colors.background,
     },
     crePageInput: {
@@ -177,6 +177,30 @@ export const useGeneralStyles = () => {
       alignItems: "flex-end",
       width: "100%",
     },
+    /*
+**
+  LsGoal Container STYLES
+  LsGoal Container STYLES
+ **
+ */
+    LsGoalContaninerContainer: {
+      width: "100%",
+      height: 70,
+      backgroundColor: Colors.button,
+      padding: 2,
+      borderRadius: 10,
+    },
+    LsGoalContaninerMain: {
+      flex: 1,
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      paddingHorizontal: 20,
+      backgroundColor: Colors.button,
+      borderWidth: 2,
+      borderColor: "yellow",
+      borderRadius: 10,
+    },
   });
 };
 
@@ -186,7 +210,7 @@ export const useOnboardingStyles = () => {
   return StyleSheet.create({
     container: {
       flex: 1,
-      paddingVertical:20,
+      paddingVertical: 20,
       backgroundColor: Colors.background,
       justifyContent: "center",
       alignItems: "center",
@@ -331,6 +355,13 @@ export const useActionButtonStyles = () => {
 };
 
 export const useTextStyles = () => {
-  const Colors = useColors();
-  return StyleSheet.create({});
+  const colors = useColors();
+
+  return StyleSheet.create({
+    lsTitle: {
+      color: colors.text,
+      fontWeight: "condensedBold",
+      fontFamily: "Bangers-Regular",
+    },
+  });
 };
