@@ -21,15 +21,15 @@ const TimesPerDayScreen = () => {
   const nextStep = () => {
     try {
       // Validate value
-      const value = Number(getValues("duration"));
+      const value = Number(getValues("noOfTimes"));
       if (typeof value != "number")
-        throw new Error("duration should be a number");
+        throw new Error("Times per day should be a number");
       if (!value || value <= 0)
         throw new Error("streak must be atleast 1 days");
       if (value > 12)
         throw new Error("Streak must be at most 12 times per days");
       // Update value with validated value before routing
-      setValue("duration", value);
+      setValue("noOfTimes", value);
       router.push("/CreateEvents/Review");
     } catch (error: unknown | Error) {
       const errorObj = error as Error;
