@@ -7,7 +7,7 @@ import {
 } from "@/lib/generic_helpers";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   FlatList,
   RefreshControl,
@@ -26,6 +26,10 @@ export const Events = () => {
   const [goals, setGoals] = useState(data);
   const styles = useScreenStyles();
   const colors = useColors();
+
+  useEffect(() => {
+    setGoals(data);
+  }, [data]);
   const onRefresh = async () => {
     setRefreshing(true);
     refresh();
