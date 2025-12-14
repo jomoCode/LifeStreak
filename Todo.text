@@ -1,7 +1,7 @@
-- add filter functionality
-- add product detail page
+- add goal detail page
 - 
 
+TODO
 1. Create an alert component for error warning and success popups.
 2. User should be able to exit event creation screen at any point in time... close button
 3. Date and time screen should show previous value if user returns back to them to make corrections
@@ -10,9 +10,16 @@
 6. 
 
 
+DONE
 . Setup Basic Goal List Page
 + design the goal tablet
 + design the goal list page
 + move date fetching to context
 + create functions for filtering based on name and Date
++ add filter functionality
+
+
+
+
+POSTPONED
 - postponed: update empty goal list to show unlit firewood with text.. Set a goal to  get your flames burning. 
