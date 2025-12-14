@@ -1,8 +1,20 @@
 import { useDb } from "@/context/useBackend";
 import { useScreenStyles } from "@/hooks/styles/useStyles";
+import { useColors } from "@/hooks/useColors";
+import {
+  filterByAlphabeticOrder,
+  filterByCreationDate,
+} from "@/lib/generic_helpers";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { FlatList, RefreshControl, Text, View } from "react-native";
+import {
+  FlatList,
+  RefreshControl,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { ActionButton } from "../atoms/ActionButton";
 import { Title } from "../atoms/Title";
 import { LsGoal } from "../molecules/LsGoal";
@@ -11,7 +23,9 @@ export const Events = () => {
   const [refreshing, setRefreshing] = useState(false);
   const router = useRouter();
   const { data, loading, refresh } = useDb();
+  const [goals, setGoals] = useState(data);
   const styles = useScreenStyles();
+  const colors = useColors();
   const onRefresh = async () => {
     setRefreshing(true);
     refresh();
@@ -20,12 +34,45 @@ export const Events = () => {
 
   return (
     <View style={styles.container}>
-      <Title variant="lg">Goals</Title>
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <Title variant="lg">Goals</Title>
+        <View style={{ flexDirection: "row", gap: 10 }}>
+          <TouchableOpacity
+            onPress={() => {
+              setGoals(filterByCreationDate(data));
+            }}
+          >
+            <Title variant="sm">
+              <MaterialCommunityIcons name="filter" color={colors.button} />
+              <MaterialCommunityIcons
+                name="sort-ascending"
+                color={colors.button}
+              />{" "}
+            </Title>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              setGoals(filterByAlphabeticOrder(data));
+            }}
+          >
+            <Title variant="sm" color={colors.button}>
+              <MaterialCommunityIcons name="filter" color={colors.button} />
+              A/Z
+            </Title>
+          </TouchableOpacity>
+        </View>
+      </View>
       {loading && data.length === 0 ? (
         <Text>Loading events...</Text>
       ) : (
         <FlatList
-          data={data}
+          data={goals}
           keyExtractor={(item) => item.event_id}
           renderItem={({ item }) => (
             <LsGoal
