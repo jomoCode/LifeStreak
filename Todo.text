@@ -1,10 +1,6 @@
-1. setup basic goal list page
-+ design the goal tablet
-+ design the goal list page
-+ move date fetching to context
-+ create functions for filtering based on name and Date
-- postponed: update empty goal list to show unlit firewood with text.. Set a goal to  get your flames burning. 
-
+- add filter functionality
+- add product detail page
+- 
 
 1. Create an alert component for error warning and success popups.
 2. User should be able to exit event creation screen at any point in time... close button
@@ -12,3 +8,11 @@
 4. Work on the copy for creating an event.
 5. Back button for easy scrolling foward and backward across screens.
 6. 
+
+
+. Setup Basic Goal List Page
++ design the goal tablet
++ design the goal list page
++ move date fetching to context
++ create functions for filtering based on name and Date
+- postponed: update empty goal list to show unlit firewood with text.. Set a goal to  get your flames burning. 
