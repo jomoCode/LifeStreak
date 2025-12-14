@@ -1,3 +1,4 @@
+- create an alert modal
 - Add goal detail page
 : Show goal name
 : a calendar like listing of goals showing missed, checked and yet to be checked:
@@ -36,3 +37,4 @@ DONE
 
 POSTPONED
 - postponed: update empty goal list to show unlit firewood with text.. Set a goal to  get your flames burning. 
+- fix  onboarding flashy screen
