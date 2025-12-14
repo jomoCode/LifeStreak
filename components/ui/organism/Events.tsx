@@ -78,7 +78,7 @@ export const Events = () => {
             <LsGoal
               streakName={item.event_name}
               onPress={() => {
-                console.log("route to next screen with event id");
+                router.push(`/HandleGoals/GoalDetails?goalId=${item.event_id}`);
               }}
             />
           )}
