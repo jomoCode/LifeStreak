@@ -30,7 +30,9 @@ export const Events = () => {
           renderItem={({ item }) => (
             <LsGoal
               streakName={item.event_name}
-              onPress={() => "route to next screen with event id"}
+              onPress={() => {
+                console.log("route to next screen with event id");
+              }}
             />
           )}
           ListEmptyComponent={
