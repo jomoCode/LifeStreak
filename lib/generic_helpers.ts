@@ -1,4 +1,5 @@
 import * as SQLite from "expo-sqlite";
+import { Event } from "./CRUDE_sqlite";
 import { initDatabase } from "./crude_sqlite_helpers";
 
 const __DEV__ = process.env.NODE_ENV !== "production";
@@ -154,11 +155,50 @@ const convertHHMM_2IsoTimeString = (timeString: string, isoDate: string) => {
   return date.toISOString();
 };
 
+/*
+--DATA FILTERS
+--DATA FILTERS
+--DATA FILTERS
+*/
+
+// Default filter
+
+const filterByCreationDate = (data: Event[]) => {
+  const totalNumberOfItems = data.length;
+
+  // Move through the array n times
+  for (let unsorted = 0; unsorted < totalNumberOfItems; unsorted++) {
+    let index = unsorted;
+    // Find the largest item in the unsorted array
+    for (let i = unsorted; i < totalNumberOfItems; i++) {
+      if (
+        Number(data[unsorted].event_id.split("_")[1]) <
+        Number(data[i].event_id.split("_")[1])
+      ) {
+        index = i;
+      }
+    }
+    // Swap sorted item to begining of array
+    [data[unsorted], data[index]] = [data[index], data[unsorted]];
+  }
+  return data;
+};
+
+const filterByAlphabeticOrder = (data: Event[]) => {
+  return [...data].sort((a, b) =>
+    a.event_name.localeCompare(b.event_name, undefined, {
+      sensitivity: "base",
+    })
+  );
+};
+
 export {
   cleanFileName,
   convert2Number,
   convert2String,
   convertHHMM_2IsoTimeString,
+  filterByAlphabeticOrder,
+  filterByCreationDate,
   getTodayMidnightUTC,
   isYYDDMMFormat,
   runSql,
