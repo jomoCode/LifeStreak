@@ -1,5 +1,18 @@
-- add goal detail page
-- 
+- Add goal detail page
+: Show goal name
+: a calendar like listing of goals showing missed, checked and yet to be checked:
+    ui look: it should contain the date of the event, the day (e.g tuesday) and the time. 
+    ui look: the baackground should be green if it's on the current day, red if it's a late and grey if its not yet time
+    ui look: the main text should be   red if late, blinky yellow and red if getting late. and dark gray if yet to come
+    ui look: events in the moringm should be inside a cloudy icon, afternoon sun icon, and evening setting sun icon.
+
+    click the missed, it responds goal can only bechcked within 24 hours time frame
+    click the empty, and it checks or complains goal can only be check on day of the event
+    click check and it becomes unchecked or it complains goal can only be unchecked within the 24 hours time frame. 
+: an edit button to edit goal
+: delete button to delete the goal
+: 
+
 
 TODO
 1. Create an alert component for error warning and success popups.
