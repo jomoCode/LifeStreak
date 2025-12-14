@@ -1,17 +1,26 @@
 import { useTextStyles } from "@/hooks/styles/useStyles";
+import { ReactNode } from "react";
 import { Text } from "react-native";
 
-
 type TitleProps = {
-  children: string;
+  children: ReactNode;
   variant: "lg" | "med" | "sm";
+  color?: string;
 };
 
-const Title = ({ children, variant }: TitleProps) => {
+const Title = ({ children, variant, color }: TitleProps) => {
   const style = useTextStyles();
   const textSize = variant === "lg" ? 30 : variant === "med" ? 20 : 16;
   return (
-    <Text style={[style.lsTitle, { fontSize: textSize }]}>{children}</Text>
+    <Text
+      style={[
+        style.lsTitle,
+        { fontSize: textSize },
+        color ? { color: color } : {},
+      ]}
+    >
+      {children}
+    </Text>
   );
 };
 
