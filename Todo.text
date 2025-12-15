@@ -21,7 +21,7 @@ TODO
 3. Date and time screen should show previous value if user returns back to them to make corrections
 4. Work on the copy for creating an event.
 5. Back button for easy scrolling foward and backward across screens.
-6. 
+6. lsButton background should be gradients from lighter to darker. on click should toggle the color i.e change the direction of the gradient
 
 
 DONE
