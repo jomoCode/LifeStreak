@@ -369,6 +369,10 @@ export const useTextStyles = () => {
       fontWeight: "condensedBold",
       fontFamily: "Bangers-Regular",
     },
+    lsText: {
+      color: colors.text,
+      fontFamily: "Bangers-Regular",
+    },
   });
 };
 

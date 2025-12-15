@@ -24,4 +24,20 @@ const Title = ({ children, variant, color }: TitleProps) => {
   );
 };
 
-export { Title };
+const LsText = ({ children, variant, color }: TitleProps) => {
+  const style = useTextStyles();
+  const textSize = variant === "lg" ? 25 : variant === "med" ? 18 : 14;
+  return (
+    <Text
+      style={[
+        style.lsText,
+        { fontSize: textSize },
+        color ? { color: color } : {},
+      ]}
+    >
+      {children}
+    </Text>
+  );
+};
+
+export { LsText, Title };
