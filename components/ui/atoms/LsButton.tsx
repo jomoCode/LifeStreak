@@ -8,6 +8,7 @@ type ButtonProps = {
   accessibilityLabel?: string;
   text?: string;
   length?: "short" | "long";
+  borderColor?: string;
 };
 
 const LsButton = ({
@@ -16,6 +17,7 @@ const LsButton = ({
   accessibilityLabel,
   text,
   length,
+  borderColor,
 }: ButtonProps) => {
   const styles = useButtonStyles();
   const short = length === "short" ? true : false;
@@ -29,7 +31,11 @@ const LsButton = ({
     return (
       <Pressable
         onPress={onPress}
-        style={[styles.container, short ? styles.short : styles.long]}
+        style={[
+          styles.container,
+          short ? styles.short : styles.long,
+          borderColor ? { borderColor: borderColor } : {},
+        ]}
         accessibilityLabel={accessibilityLabel}
       >
         <View style={styles.content}>
