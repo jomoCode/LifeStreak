@@ -22,8 +22,9 @@ TODO
 4. Work on the copy for creating an event.
 5. Back button for easy scrolling foward and backward across screens.
 6. lsButton background should be gradients from lighter to darker. on click should toggle the color i.e change the direction of the gradient
-
-
+7. user should not select end date. end date should be calculated from startDate + duration
+8. edge case: maximum duration: 30 days. minimum.. 2 days. user should not be able to select an interval more than half of duration
+9. If no of times per day is more than one, prompt user to select an hourly     interval
 DONE
 . Setup Basic Goal List Page
 + design the goal tablet

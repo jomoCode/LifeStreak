@@ -192,6 +192,15 @@ const filterByAlphabeticOrder = (data: Event[]) => {
   );
 };
 
+const formatTimeTo12Hour = (time24: string) => {
+  const [hourStr, minuteStr] = time24.split(":");
+  let hour = Number(hourStr);
+  const minute = Number(minuteStr);
+  const ampm = hour >= 12 ? "PM" : "AM";
+  hour = hour % 12 || 12;
+  return `${hour}:${minute.toString().padStart(2, "0")} ${ampm}`;
+};
+
 export {
   cleanFileName,
   convert2Number,
@@ -199,6 +208,7 @@ export {
   convertHHMM_2IsoTimeString,
   filterByAlphabeticOrder,
   filterByCreationDate,
+  formatTimeTo12Hour,
   getTodayMidnightUTC,
   isYYDDMMFormat,
   runSql,
