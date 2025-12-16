@@ -4,6 +4,7 @@ import { useGeneralStyles } from "@/hooks/styles/useStyles";
 import { useColors } from "@/hooks/useColors";
 import {
   cleanFileName,
+  formatTimeTo12Hour,
   getTodayMidnightUTC,
   runSql,
 } from "@/lib/generic_helpers";
@@ -98,14 +99,16 @@ const ReviewScreen = () => {
     >
       <View>
         <Text style={styles.crePageLabel}>
-          <Text style={{ color: colors.button }}>{duration} days</Text> from
-          now,{" "}
-          <Text style={{ color: colors.button, display: "none" }}>{goal}</Text>{" "}
+          <Text style={{ color: colors.button }}>In {duration} days</Text>{" "}
+          you’ll have made progress on{" "}
+          <Text style={{ color: colors.button, display: "none" }}>
+            &quot;{goal}&quot;
+          </Text>{" "}
           will be yours.
         </Text>
 
         <Text style={{ fontSize: 18, fontWeight: "600", marginTop: 12 }}>
-          Build your streak:
+          Here’s how your streak will work:
         </Text>
         <View style={{ gap: 8, marginLeft: 4 }}>
           <Text style={{ fontSize: 18, lineHeight: 22 }}>
@@ -114,7 +117,7 @@ const ReviewScreen = () => {
               color={colors.button}
               size={12}
             />{" "}
-            {timesPerDay} daily check-in{timesPerDay > 1 ? "s" : ""}
+            {timesPerDay} check-in{timesPerDay > 1 ? "s" : ""} per day
           </Text>
           <Text style={{ fontSize: 16, lineHeight: 22 }}>
             <MaterialCommunityIcons
@@ -122,7 +125,7 @@ const ReviewScreen = () => {
               color={colors.button}
               size={12}
             />{" "}
-            {interval === 1 ? "Daily" : `Every ${interval} days`}
+            {interval === 1 ? "Every day" : `Once every ${interval} days`}
           </Text>
           <Text style={{ fontSize: 16, lineHeight: 22 }}>
             <MaterialCommunityIcons
@@ -132,11 +135,15 @@ const ReviewScreen = () => {
             />{" "}
             First check-in:{" "}
             <Text style={{ color: colors.button, fontWeight: "bold" }}>
-              {new Date(startDay).toDateString()}
+              {new Date(startDay).toLocaleDateString(undefined, {
+                weekday: "long",
+                month: "short",
+                day: "numeric",
+              })}
             </Text>{" "}
             -{" "}
             <Text style={{ color: colors.button, fontWeight: "bold" }}>
-              {startTime}
+              {formatTimeTo12Hour( startTime)}
             </Text>
           </Text>
         </View>
@@ -150,7 +157,7 @@ const ReviewScreen = () => {
           length="long"
         >
           <Text style={{ fontSize: 16, fontWeight: "700", color: "white" }}>
-            Start my streak{" "}
+            Create my streak{" "}
             <MaterialCommunityIcons name="fire" size={20} color="yellow" />
           </Text>
         </LsButton>
