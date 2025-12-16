@@ -20,7 +20,7 @@ const intervalOptions = [
   { label: "Every 4 days", value: 4 },
   { label: "Every 5 days", value: 5 },
   { label: "Every 6 days", value: 6 },
-  { label: "Weekly", value: 7 },
+  { label: "Once a week", value: 7 },
 ];
 
 const StreakInterval = () => {
@@ -33,17 +33,17 @@ const StreakInterval = () => {
   const handleSelect = (value: number) => {
     setValue("interval", value);
     setShowPicker(false);
-    setPicked(`${value} days interval selected`);
+    setPicked(`Every ${value} day${value > 1 ? "s" : ""}`);
   };
   const nextStep = () => {
     try {
       // Validate value
       const value = Number(getValues("interval"));
       if (typeof value != "number")
-        throw new Error("duration should be a number");
+        throw new Error("Please select how often this should happen");
       if (!value || value < 1)
-        throw new Error("interval must be atleast 1 days");
-      if (value > 7) throw new Error("interval must be at most 7 days");
+        throw new Error("Frequency must be at least once a day");
+      if (value > 7) throw new Error("Frequency can be up to once a week");
       // Update value with validated value before routing
       setValue("interval", value);
       router.push("/CreateEvents/TimesPerDay");
@@ -57,7 +57,7 @@ const StreakInterval = () => {
     <CreateEvent
       field="duration"
       moveToNextStep={nextStep}
-      title="How long is your streak?"
+      title="How often will you do this?"
     >
       <Pressable
         onPress={() => {
@@ -65,7 +65,7 @@ const StreakInterval = () => {
         }}
       >
         <Text style={styles.crePageLabel}>
-          <Text>Select number Interval</Text>{" "}
+          <Text>Choose how often</Text>{" "}
           <MaterialCommunityIcons
             name={showPicker ? "menu-down" : "menu-right"}
             size={20}
@@ -75,6 +75,9 @@ const StreakInterval = () => {
       {!showPicker && picked && <Text style={styles.title}>{picked}</Text>}
 
       {err && <Text style={{ color: "red" }}>{err}</Text>}
+      <Text style={{ color: "blue" }}>
+        This decides how often your streak appears.
+      </Text>
       <View style={{ minHeight: 250 }}>
         {showPicker && (
           <FlatList

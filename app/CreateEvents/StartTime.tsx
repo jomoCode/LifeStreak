@@ -53,10 +53,14 @@ const StartTimeScreen = () => {
       return;
     }
 
-   if (!err) router.push("/CreateEvents/StreakDuration");
+    if (!err) router.push("/CreateEvents/StreakDuration");
   };
   return (
-    <CreateEvent title="What time?" moveToNextStep={nextStep} field="startTime">
+    <CreateEvent
+      title="What time should it start?"
+      moveToNextStep={nextStep}
+      field="startTime"
+    >
       {!calendar ? (
         <ActionButton
           containerStyles={{ alignItems: "center" }}
@@ -73,7 +77,7 @@ const StartTimeScreen = () => {
       )}
 
       <Text style={styles.crePageLabel}>
-        Selected Time:{" "}
+        Your start time:{" "}
         <Text style={{ color: "black", fontSize: 16 }}>
           {calendarValue ? calendarValue.toLocaleTimeString() : "-- -- --"}
         </Text>

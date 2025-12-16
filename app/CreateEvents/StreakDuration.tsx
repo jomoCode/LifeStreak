@@ -40,16 +40,16 @@ const StreakDuration = () => {
     <CreateEvent
       field="duration"
       moveToNextStep={nextStep}
-      title="How long is your streak?"
+      title="How many days will you commit to?"
     >
       <Controller
         control={control}
         rules={validationRules}
         render={({ field: { onChange, onBlur, value } }) => (
           <View>
-            <Text style={styles.crePageLabel}>How long to achieve goal</Text>
+            <Text style={styles.crePageLabel}>Number of days</Text>
             <TextInput
-              placeholder="Eg: 28"
+              placeholder="e.g. 21 days"
               onBlur={onBlur}
               onChangeText={(event) => {
                 onChange(event);
@@ -61,6 +61,9 @@ const StreakDuration = () => {
               style={styles.crePageInput}
             />
             {err && <Text style={{ color: "red" }}>{err}</Text>}
+            <Text style={{color:'blue'}}>
+              Start small — you can always create a longer streak later.
+            </Text>
           </View>
         )}
         name="duration"

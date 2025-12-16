@@ -22,12 +22,10 @@ const TimesPerDayScreen = () => {
     try {
       // Validate value
       const value = Number(getValues("noOfTimes"));
-      if (typeof value != "number")
-        throw new Error("Times per day should be a number");
+      if (typeof value != "number") throw new Error("Please enter a number");
       if (!value || value <= 0)
-        throw new Error("streak must be atleast 1 days");
-      if (value > 12)
-        throw new Error("Streak must be at most 12 times per days");
+        throw new Error("You need at least 1 time per day");
+      if (value > 12) throw new Error("You can do this up to 12 times per day");
       // Update value with validated value before routing
       setValue("noOfTimes", value);
       router.push("/CreateEvents/Review");
@@ -41,7 +39,7 @@ const TimesPerDayScreen = () => {
     <CreateEvent
       field="noOfTimes"
       moveToNextStep={nextStep}
-      title="How many times per day?"
+      title="How many times a day?"
     >
       <Controller
         control={control}
@@ -49,10 +47,10 @@ const TimesPerDayScreen = () => {
         render={({ field: { onChange, onBlur, value } }) => (
           <View>
             <Text style={styles.crePageLabel}>
-              How many will you attend to this goal per day
+              How many times will you do this each day?
             </Text>
             <TextInput
-              placeholder="Eg: 3"
+              placeholder="e.g. 3"
               onBlur={onBlur}
               onChangeText={onChange}
               value={`${value}`}

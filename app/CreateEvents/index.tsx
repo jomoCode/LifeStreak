@@ -20,13 +20,17 @@ const EventTitle = () => {
   const nextStep = () => {
     try {
       const event = getValues("eventName");
-      if (!event) throw new Error("Streak title is required");
-      if (event.length <= 1)
-        throw new Error("streak title must be atleast 4 characters long", {
-          cause: "Invalid client input",
-        });
-      if (event.length > 50)
-        throw new Error("Event name must be most 50 characters long");
+      if (!event) {
+        throw new Error("Please enter a streak title");
+      }
+
+      if (event.length < 4) {
+        throw new Error("Streak title must be at least 4 characters long");
+      }
+
+      if (event.length > 50) {
+        throw new Error("Streak title must be 50 characters or less");
+      }
       router.push("/CreateEvents/StartDate");
     } catch (error: unknown | Error) {
       const errorObj = error as Error;
@@ -38,16 +42,18 @@ const EventTitle = () => {
     <CreateEvent
       field="eventName"
       moveToNextStep={nextStep}
-      title="What do you wish to achieve?"
+      title="What habit do you want to build?"
     >
       <Controller
         control={control}
         rules={validationRules}
         render={({ field: { onChange, onBlur, value } }) => (
           <View>
-            <Text style={styles.crePageLabel}>Write your end result</Text>
+            <Text style={styles.crePageLabel}>
+              Give your streak a clear name
+            </Text>
             <TextInput
-              placeholder="Eg: Morning Jog for 10 days"
+              placeholder="e.g. Morning jog for 10 days"
               onBlur={onBlur}
               onChangeText={(event) => {
                 onChange(event);

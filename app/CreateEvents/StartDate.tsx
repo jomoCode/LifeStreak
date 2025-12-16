@@ -68,7 +68,7 @@ const StartDateScreen = () => {
       )}
 
       <Text style={styles.crePageLabel}>
-        Selected Date:{" "}
+        Your start date:{" "}
         <Text style={{ color: "black", fontSize: 16 }}>
           {calendarValue ? calendarValue.toDateString() : "-- -- --"}
         </Text>
