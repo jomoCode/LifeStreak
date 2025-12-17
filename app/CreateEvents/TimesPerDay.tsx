@@ -21,13 +21,13 @@ const TimesPerDayScreen = () => {
   const nextStep = () => {
     try {
       // Validate value
-      const value = Number(getValues("noOfTimes"));
+      const value = Number(getValues("timesPerDay"));
       if (typeof value != "number") throw new Error("Please enter a number");
       if (!value || value <= 0)
         throw new Error("You need at least 1 time per day");
       if (value > 12) throw new Error("You can do this up to 12 times per day");
       // Update value with validated value before routing
-      setValue("noOfTimes", value);
+      setValue("timesPerDay", value);
       router.push("/CreateEvents/Review");
     } catch (error: unknown | Error) {
       const errorObj = error as Error;
@@ -37,7 +37,7 @@ const TimesPerDayScreen = () => {
 
   return (
     <CreateEvent
-      field="noOfTimes"
+      field="timesPerDay"
       moveToNextStep={nextStep}
       title="How many times a day?"
     >
@@ -62,7 +62,7 @@ const TimesPerDayScreen = () => {
             {err && <Text style={{ color: "red" }}>{err}</Text>}
           </View>
         )}
-        name="noOfTimes"
+        name="timesPerDay"
       />
     </CreateEvent>
   );

@@ -32,7 +32,7 @@ export const LsAlertContainer = ({
       visible={visible}
       dismissableBackButton
       onDismiss={onDismiss}
-      style={{ justifyContent: "center", alignItems: "center" }}
+      style={{flex:1, justifyContent: "center", alignItems: "center" }}
     >
       <View
         style={{

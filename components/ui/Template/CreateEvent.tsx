@@ -1,18 +1,13 @@
 import { LsButton } from "@/components/ui/atoms/LsButton";
 import { CreateStreakFormProps } from "@/context/CreateStreakForm_";
 import { useGeneralStyles } from "@/hooks/styles/useStyles";
+import { EventType } from "@/lib/CRUDE_sqlite";
 import { MaterialIcons } from "@expo/vector-icons";
 import React, { ReactNode } from "react";
 import { useFormContext } from "react-hook-form";
 import { Text, View } from "react-native";
 
-type Field =
-  | "eventName"
-  | "interval"
-  | "duration"
-  | "noOfTimes"
-  | "startDate"
-  | "startTime";
+type Field = EventType;
 type CreateEventProps = {
   field: Field;
   moveToNextStep: () => void;
@@ -26,8 +21,6 @@ const CreateEvent = ({
   title,
   children,
 }: CreateEventProps) => {
-  const { getFieldState } = useFormContext<CreateStreakFormProps>();
-  const { error } = getFieldState(field);
   const styles = useGeneralStyles();
   return (
     <View style={styles.crePageContainer}>

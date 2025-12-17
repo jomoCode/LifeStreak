@@ -7,27 +7,18 @@ import {
 } from "./generic_helpers";
 
 // ------------------- Types -------------------
-export type Event = {
-  event_id: string;
-  event_name: string;
-  startDate: string; // ISO string (midnight UTC)
-  startTime: string; // ISO string (time on the startDate)
-  interval: number;
-  duration: number;
-  No_of_times_checked: number;
-  No_of_times_to_be_checked: number;
-  expired: boolean;
-  last_checked: string; // ISO string (midnight UTC) or empty string
-};
 
 export type CreateEvent = {
   event_name: string;
-  duration: string;
-  interval: string;
+  duration: number;
+  interval: number;
   startTime: string; // Time formats: "08:00" or full ISO
   startDate: string; // Date formats:  YYYY-MM-DD or ISO
-  no_of_times_to_be_checked: string;
+  timesPerDay: number; // number of events per day
+  timeInterval: number;
 };
+
+export type Event = CreateEvent & { event_id: string };
 
 // Read all events
 export const readEvents = async () => {
@@ -51,43 +42,51 @@ export const createEvent = async ({
   interval,
   startTime,
   startDate,
-  no_of_times_to_be_checked,
+  timesPerDay,
+  timeInterval,
 }: CreateEvent) => {
   try {
     const event_id = `${event_name.replace(/\s+/g, "_")}_${Date.now()}`;
 
+    // Normalize startDate to UTC midnight
     const startDateISO = getTodayMidnightUTC(startDate);
 
+    // Normalize startTime
     let startTimeISO = "";
     if (typeof startTime === "string" && startTime.includes("T")) {
-      //  Assumes start time already in ISO if it contains T
+      // Already an ISO timestamp
       startTimeISO = new Date(startTime).toISOString();
     } else if (typeof startTime === "string") {
-      // Time format must be: "08:00" or "8:00" or full ISO STRING
+      // Convert "HH:mm" to ISO string on the startDate
       startTimeISO = convertHHMM_2IsoTimeString(startTime, startDateISO);
     } else {
-      // fallback: use startDate midnight
-      throw new Error("start Time format is invalid");
+      throw new Error("startTime format is invalid");
     }
 
-    await runSql(
-      `INSERT INTO events (
-        event_id, event_name, startDate, startTime, interval, duration,
-        No_of_times_checked, No_of_times_to_be_checked, expired, last_checked
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        event_id,
-        event_name,
-        startDateISO,
-        startTimeISO,
-        Number(interval),
-        Number(duration),
-        Number(0), // No_of_times_checked
-        Number(no_of_times_to_be_checked),
-        Number(0), // expired
-        getTodayMidnightUTC(),
-      ]
-    );
+    // Insert into DB
+await runSql(
+  `INSERT INTO events (
+    event_id,
+    event_name,
+    startDate,
+    startTime,
+    interval,
+    duration,
+    timesPerDay,
+    timeInterval
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+  [
+    event_id,
+    event_name,
+    startDateISO,
+    startTimeISO,
+    Number(interval),
+    Number(duration),
+    Number(timesPerDay),
+    Number(timeInterval),
+  ]
+);
+
 
     return { success: "Event created", event_id };
   } catch (error) {
@@ -102,21 +101,19 @@ type UpdateEventField<K extends keyof Event> = {
 };
 
 // Update specific field of event
+export type EventType = keyof Event;
+
 export const updateEventField = async <K extends keyof Event>({
   event_id,
   eventField,
   updatedValue,
 }: UpdateEventField<K>) => {
-  const mutableFields: (keyof Event)[] = [
+  const mutableFields: EventType[] = [
     "event_name",
     "startDate",
     "startTime",
     "interval",
     "duration",
-    "No_of_times_checked",
-    "No_of_times_to_be_checked",
-    "expired",
-    "last_checked",
   ];
   if (!mutableFields.includes(eventField))
     return { error: "Field cannot be updated" };
@@ -127,26 +124,17 @@ export const updateEventField = async <K extends keyof Event>({
     [
       "interval",
       "duration",
-      "No_of_times_checked",
-      "No_of_times_to_be_checked",
+      "timesPerDay",
+      "timeInterval",
     ].includes(eventField as string)
   )
     valueToStore = Number(updatedValue);
 
-  if (eventField === "expired") {
-    // Convert booleans to ) and 1's for sqlite compatablity
-    const suspectedBooleanValue = updatedValue;
-    if (typeof suspectedBooleanValue === "boolean")
-      valueToStore = suspectedBooleanValue ? 1 : 0;
-    else {
-      throw new Error("Error saving data: Expired is suppoed to be a boolean");
-    }
-  }
-
-  if (eventField === "startDate" || eventField === "last_checked")
+  if (eventField === "startDate")
     valueToStore = getTodayMidnightUTC(String(updatedValue));
 
   if (eventField === "startTime") {
+    if (eventField === "startTime") {
     // Accept either an ISO or a time string like "08:00"
     const startTimeString = String(updatedValue);
     if (startTimeString.includes("T"))
@@ -168,7 +156,7 @@ export const updateEventField = async <K extends keyof Event>({
   } catch (error) {
     return { error: `Error updating event: ${error}` };
   }
-};
+}};
 
 // Delete event
 export const deleteEvent = async (event_id: string) => {
@@ -200,7 +188,10 @@ export const getViableEventsToday = async () => {
     const normalized = rows
       .map((row) => cleanDatabaseRow(row))
       .filter((event) => {
-        const days_since_start = convert2Number(event.days_since_start, 'getViableEventsToday');
+        const days_since_start = convert2Number(
+          event.days_since_start,
+          "getViableEventsToday"
+        );
         return (
           days_since_start >= 0 &&
           days_since_start <= event.duration &&

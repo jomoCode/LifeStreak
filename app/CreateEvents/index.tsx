@@ -19,7 +19,7 @@ const EventTitle = () => {
   const { control, getValues } = useFormContext<CreateStreakFormProps>();
   const nextStep = () => {
     try {
-      const event = getValues("eventName");
+      const event = getValues("event_name");
       if (!event) {
         throw new Error("Please enter a streak title");
       }
@@ -40,7 +40,7 @@ const EventTitle = () => {
 
   return (
     <CreateEvent
-      field="eventName"
+      field="event_name"
       moveToNextStep={nextStep}
       title="What habit do you want to build?"
     >
@@ -66,7 +66,7 @@ const EventTitle = () => {
             {err && <Text style={{ color: "red" }}>{err}</Text>}
           </View>
         )}
-        name="eventName"
+        name="event_name"
       />
     </CreateEvent>
   );

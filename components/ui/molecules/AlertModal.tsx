@@ -5,9 +5,11 @@ import { View } from "react-native";
 import { LsButton } from "../atoms/LsButton";
 import { useColors } from "@/hooks/useColors";
 
+
+export type AlertTypeEnum = "error" | "success" | "warning";
 type LsAlertProps = {
-  streakName: string;
-  alertType: "error" | "success" | "warning";
+  title: string;
+  alertType: AlertTypeEnum;
   message: string;
   open: boolean;
   dismissModal: () => void;
@@ -18,7 +20,7 @@ type LsAlertProps = {
 };
 
 export const LsAlert = ({
-  streakName,
+  title,
   alertType,
   message,
   open,
@@ -43,7 +45,7 @@ export const LsAlert = ({
       onDismiss={dismissModal}
     >
       <Title variant="med" color={alertStyles[alertType]}>
-        {streakName}{" "}
+        {title}{" "}
         <MaterialCommunityIcons
           name="fire"
           size={25}

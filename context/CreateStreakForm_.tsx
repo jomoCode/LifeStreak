@@ -1,26 +1,11 @@
+import { CreateEvent } from "@/lib/CRUDE_sqlite";
 import { ReactNode } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
-export type CreateStreakFormProps = {
-  interval: number;
-  duration: number;
-  noOfTimes: number;
-  eventName: string;
-  startDate: string;
-  startTime: string;
-};
+export type CreateStreakFormProps = CreateEvent;
 type CreateStreakFormKids = { children: ReactNode };
 
 export const CreateStreakForm = ({ children }: CreateStreakFormKids) => {
-  const methods = useForm<CreateStreakFormProps>({
-    defaultValues: {
-      duration: -1,
-      eventName: "",
-      interval: -1,
-      noOfTimes: -1,
-      startDate: "",
-      startTime: "",
-    },
-  });
+  const methods = useForm<CreateStreakFormProps>({});
   return <FormProvider {...methods}>{children}</FormProvider>;
 };

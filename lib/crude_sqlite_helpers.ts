@@ -23,12 +23,8 @@ const cleanDatabaseRow = (row: Event) => {
 
     interval: convert2Number(row.interval, 'interval cleanDatabaseRow'),
     duration: convert2Number(row.duration, 'duration cleanDatabaseRow'),
-    No_of_times_checked: convert2Number(row.No_of_times_checked, 'No_of_times_checked cleanDatabaseRow'),
-    No_of_times_to_be_checked: convert2Number(row.No_of_times_to_be_checked, 'No_of_times_to_be_checked cleanDatabaseRow'),
-
-    // convert 0/1 or strings into boolean
-    expired: Boolean(row.expired && Number(row.expired) !== 0),
-    last_checked: row.last_checked ? String(row.last_checked) : "",
+    timeInterval: convert2Number(row.timeInterval, 'timeInterval cleanDatabaseRow'),
+    timesPerDay: convert2Number(row.timesPerDay, 'timesPerDay cleanDatabaseRow'),
   };
 
   // Add uncleaned rows to cleanedRows
@@ -66,12 +62,9 @@ const initDatabase = async () => {
         startTime TEXT,
         interval INTEGER,
         duration INTEGER,
-        No_of_times_checked INTEGER,
-        No_of_times_to_be_checked INTEGER,
-        expired INTEGER,
-        last_checked TEXT
-      );
-    `);
+        timesPerDay INTEGER,
+        timeInterval INTEGER
+      )`);
     console.log("✅ Events table initialized successfully.");
   } catch (error) {
     console.error("❌ Failed to initialize database:", error);

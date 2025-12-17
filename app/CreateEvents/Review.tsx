@@ -1,93 +1,86 @@
 import { LsButton } from "@/components/ui/atoms/LsButton";
+import { AlertTypeEnum, LsAlert } from "@/components/ui/molecules/AlertModal";
 import { CreateStreakFormProps } from "@/context/CreateStreakForm_";
 import { useGeneralStyles } from "@/hooks/styles/useStyles";
 import { useColors } from "@/hooks/useColors";
-import {
-  cleanFileName,
-  formatTimeTo12Hour,
-  getTodayMidnightUTC,
-  runSql,
-} from "@/lib/generic_helpers";
+import { createEvent } from "@/lib/CRUDE_sqlite";
+import { formatTimeTo12Hour } from "@/lib/generic_helpers";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React from "react";
+import React, { useState } from "react";
 import { SubmitHandler, useFormContext } from "react-hook-form";
-import { Alert, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
 const ReviewScreen = () => {
+  const [alert, setAlert] = useState<{
+    title: string;
+    type: AlertTypeEnum;
+    message: string;
+    action: () => any;
+    button: string;
+  } | null>(null);
   const { getValues, handleSubmit, reset } =
     useFormContext<CreateStreakFormProps>();
   const styles = useGeneralStyles();
   const colors = useColors();
   const router = useRouter();
   const duration = getValues("duration");
-  const goal = getValues("eventName");
-  const timesPerDay = getValues("noOfTimes");
+  const goal = getValues("event_name");
   const interval = getValues("interval");
   const startDay = getValues("startDate");
   const startTime = getValues("startTime");
+  const timesPerDay = getValues("timesPerDay");
 
   const submit: SubmitHandler<CreateStreakFormProps> = async (data) => {
-    // convert and normalize
-    const fixedData = {
-      ...data,
-      interval: Number(data.interval),
-      duration: Number(data.duration),
-      noOfTimes: Number(data.noOfTimes),
-    };
-
-    // Convert startDate to midnight UTC only ONCE
-    const startDateISO = getTodayMidnightUTC(fixedData.startDate);
-
-    // Convert startTime properly:
-    const startTimeISO = new Date(startDateISO);
-    const [hour, minute] = fixedData.startTime.split(":");
-    startTimeISO.setUTCHours(Number(hour));
-    startTimeISO.setUTCMinutes(Number(minute));
-    startTimeISO.setUTCSeconds(0);
-    startTimeISO.setUTCMilliseconds(0);
-
-    fixedData.startDate = startDateISO;
-    fixedData.startTime = startTimeISO.toISOString();
-
-    const event_id = `${cleanFileName(fixedData.eventName)}_${Date.now()}`;
-
     try {
-      await runSql(
-        `INSERT INTO events (
-        event_id, event_name, startDate, startTime, interval, duration,
-        No_of_times_checked, No_of_times_to_be_checked, expired, last_checked
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [
-          event_id,
-          fixedData.eventName,
-          fixedData.startDate,
-          fixedData.startTime,
-          fixedData.interval,
-          fixedData.duration,
-          Number(0),
-          Number(fixedData.noOfTimes),
-          Number(0),
-          getTodayMidnightUTC(),
-        ]
-      );
+      // Convert numeric fields
+      const fixedData = {
+        ...data,
+        interval: Number(data.interval),
+        duration: Number(data.duration),
+        timesPerDay: Number(data.timesPerDay),
+        timeInterval: Number(data.timeInterval),
+      };
 
-      Alert.alert("Success", "Event created successfully!", [
-        {
-          text: "Continue",
-          onPress: () => {
+      // Call your createEvent function
+      const result = await createEvent({
+        event_name: fixedData.event_name,
+        duration: fixedData.duration,
+        interval: fixedData.interval,
+        startDate: fixedData.startDate, // ISO string or Date string
+        startTime: fixedData.startTime, // ISO string or "HH:mm"
+        timesPerDay: fixedData.timesPerDay,
+        timeInterval: fixedData.timeInterval,
+      });
+
+      if ("success" in result) {
+        setAlert({
+          title: "Success",
+          type: "success",
+          message: "Event created successfully",
+          action: () => {
             router.push("/");
           },
-          style: "default",
-        },
-      ]);
-      reset();
-    } catch (error) {
-      console.error("Error creating event:", error);
-      Alert.alert("Error", "Failed to create event");
+          button: "Continue",
+        });
+
+        reset();
+      } else {
+        throw new Error(result.error);
+      }
+    } catch (error: unknown | Error) {
+      const errorObj = error as Error;
+      const errorMessage = errorObj.message;
+
+      setAlert({
+        title: "Failed to create streak!",
+        message: errorMessage ? errorMessage : "Error creating events",
+        type: "error",
+        button: "Try again",
+        action: () => {},
+      });
     }
   };
-
   return (
     <View
       style={{
@@ -103,8 +96,7 @@ const ReviewScreen = () => {
           you’ll have made progress on{" "}
           <Text style={{ color: colors.button, display: "none" }}>
             &quot;{goal}&quot;
-          </Text>{" "}
-          will be yours.
+          </Text>
         </Text>
 
         <Text style={{ fontSize: 18, fontWeight: "600", marginTop: 12 }}>
@@ -143,7 +135,7 @@ const ReviewScreen = () => {
             </Text>{" "}
             -{" "}
             <Text style={{ color: colors.button, fontWeight: "bold" }}>
-              {formatTimeTo12Hour( startTime)}
+              {startTime? formatTimeTo12Hour(startTime): '------'}
             </Text>
           </Text>
         </View>
@@ -162,6 +154,17 @@ const ReviewScreen = () => {
           </Text>
         </LsButton>
       </View>
+      {alert && (
+        <LsAlert
+          open={!!alert.message}
+          handleLeftButton={alert.action}
+          leftButtonText={alert.button}
+          dismissModal={() => setAlert(null)}
+          title={alert.title}
+          alertType={alert.type}
+          message={alert.message}
+        />
+      )}
     </View>
   );
 };

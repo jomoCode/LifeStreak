@@ -193,6 +193,7 @@ const filterByAlphabeticOrder = (data: Event[]) => {
 };
 
 const formatTimeTo12Hour = (time24: string) => {
+  console.log('what do i get here: ',time24)
   const [hourStr, minuteStr] = time24.split(":");
   let hour = Number(hourStr);
   const minute = Number(minuteStr);
