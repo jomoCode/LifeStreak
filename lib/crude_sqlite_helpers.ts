@@ -2,9 +2,7 @@ import * as SQLite from "expo-sqlite";
 import { Event } from "./CRUDE_sqlite";
 import { convert2Number, convert2String } from "./generic_helpers";
 
-
 let db: SQLite.SQLiteDatabase | null = null;
-
 
 /**
  * Normalize a raw DB row into the `Event` shape expected by the frontend.
@@ -21,10 +19,20 @@ const cleanDatabaseRow = (row: Event) => {
     startDate: row.startDate ? String(row.startDate) : "",
     startTime: row.startTime ? String(row.startTime) : "",
 
-    interval: convert2Number(row.interval, 'interval cleanDatabaseRow'),
-    duration: convert2Number(row.duration, 'duration cleanDatabaseRow'),
-    timeInterval: convert2Number(row.timeInterval, 'timeInterval cleanDatabaseRow'),
-    timesPerDay: convert2Number(row.timesPerDay, 'timesPerDay cleanDatabaseRow'),
+    interval: convert2Number(row.interval, "interval cleanDatabaseRow"),
+    duration: convert2Number(row.duration, "duration cleanDatabaseRow"),
+    timeInterval: convert2Number(
+      row.timeInterval,
+      "timeInterval cleanDatabaseRow"
+    ),
+    timesPerDay: convert2Number(
+      row.timesPerDay,
+      "timesPerDay cleanDatabaseRow"
+    ),
+    No_of_times_checked: convert2Number(
+      row.No_of_times_checked,
+      "No_of_times_checked cleanDatabaseRow"
+    ),
   };
 
   // Add uncleaned rows to cleanedRows
@@ -35,13 +43,12 @@ const cleanDatabaseRow = (row: Event) => {
   return cleanedDbRow;
 };
 
-
 /**
  * Opens the SQLite database asynchronously (singleton pattern).
  */
 type openDBType = Promise<SQLite.SQLiteDatabase>;
 
- const openDB = async (): openDBType => {
+const openDB = async (): openDBType => {
   if (!db) {
     db = await SQLite.openDatabaseAsync("events.db");
   }
@@ -63,7 +70,8 @@ const initDatabase = async () => {
         interval INTEGER,
         duration INTEGER,
         timesPerDay INTEGER,
-        timeInterval INTEGER
+        timeInterval INTEGER,
+        No_of_times_checked INTEGER
       )`);
     console.log("✅ Events table initialized successfully.");
   } catch (error) {

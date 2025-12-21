@@ -16,6 +16,7 @@ export type CreateEvent = {
   startDate: string; // Date formats:  YYYY-MM-DD or ISO
   timesPerDay: number; // number of events per day
   timeInterval: number;
+  No_of_times_checked: number;
 };
 
 export type Event = CreateEvent & { event_id: string };
@@ -64,8 +65,8 @@ export const createEvent = async ({
     }
 
     // Insert into DB
-await runSql(
-  `INSERT INTO events (
+    await runSql(
+      `INSERT INTO events (
     event_id,
     event_name,
     startDate,
@@ -73,20 +74,21 @@ await runSql(
     interval,
     duration,
     timesPerDay,
-    timeInterval
-  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-  [
-    event_id,
-    event_name,
-    startDateISO,
-    startTimeISO,
-    Number(interval),
-    Number(duration),
-    Number(timesPerDay),
-    Number(timeInterval),
-  ]
-);
-
+    timeInterval,
+     No_of_times_checked
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        event_id,
+        event_name,
+        startDateISO,
+        startTimeISO,
+        Number(interval),
+        Number(duration),
+        Number(timesPerDay),
+        Number(timeInterval),
+        Number(0),
+      ]
+    );
 
     return { success: "Event created", event_id };
   } catch (error) {
@@ -114,6 +116,7 @@ export const updateEventField = async <K extends keyof Event>({
     "startTime",
     "interval",
     "duration",
+    "No_of_times_checked",
   ];
   if (!mutableFields.includes(eventField))
     return { error: "Field cannot be updated" };
@@ -121,12 +124,9 @@ export const updateEventField = async <K extends keyof Event>({
   let valueToStore: unknown = updatedValue;
 
   if (
-    [
-      "interval",
-      "duration",
-      "timesPerDay",
-      "timeInterval",
-    ].includes(eventField as string)
+    ["interval", "duration", "timesPerDay", "timeInterval"].includes(
+      eventField as string
+    )
   )
     valueToStore = Number(updatedValue);
 
@@ -135,28 +135,29 @@ export const updateEventField = async <K extends keyof Event>({
 
   if (eventField === "startTime") {
     if (eventField === "startTime") {
-    // Accept either an ISO or a time string like "08:00"
-    const startTimeString = String(updatedValue);
-    if (startTimeString.includes("T"))
-      valueToStore = new Date(startTimeString).toISOString();
-    else {
-      const jsDate = new Date();
-      const [h = "0", m = "0"] = startTimeString.split(":");
-      jsDate.setUTCHours(Number(h), Number(m), 0, 0);
-      valueToStore = jsDate.toISOString();
+      // Accept either an ISO or a time string like "08:00"
+      const startTimeString = String(updatedValue);
+      if (startTimeString.includes("T"))
+        valueToStore = new Date(startTimeString).toISOString();
+      else {
+        const jsDate = new Date();
+        const [h = "0", m = "0"] = startTimeString.split(":");
+        jsDate.setUTCHours(Number(h), Number(m), 0, 0);
+        valueToStore = jsDate.toISOString();
+      }
+    }
+
+    try {
+      await runSql(`UPDATE events SET ${eventField} = ? WHERE event_id = ?`, [
+        valueToStore,
+        event_id,
+      ]);
+      return { success: "Field updated" };
+    } catch (error) {
+      return { error: `Error updating event: ${error}` };
     }
   }
-
-  try {
-    await runSql(`UPDATE events SET ${eventField} = ? WHERE event_id = ?`, [
-      valueToStore,
-      event_id,
-    ]);
-    return { success: "Field updated" };
-  } catch (error) {
-    return { error: `Error updating event: ${error}` };
-  }
-}};
+};
 
 // Delete event
 export const deleteEvent = async (event_id: string) => {
