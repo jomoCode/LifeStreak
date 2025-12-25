@@ -118,46 +118,36 @@ export const updateEventField = async <K extends keyof Event>({
     "duration",
     "No_of_times_checked",
   ];
+
   if (!mutableFields.includes(eventField))
     return { error: "Field cannot be updated" };
 
   let valueToStore: unknown = updatedValue;
 
-  if (
-    ["interval", "duration", "timesPerDay", "timeInterval"].includes(
-      eventField as string
-    )
-  )
+  if (["interval", "duration", "timesPerDay", "timeInterval"].includes(eventField))
     valueToStore = Number(updatedValue);
 
   if (eventField === "startDate")
     valueToStore = getTodayMidnightUTC(String(updatedValue));
 
   if (eventField === "startTime") {
-    if (eventField === "startTime") {
-      // Accept either an ISO or a time string like "08:00"
-      const startTimeString = String(updatedValue);
-      if (startTimeString.includes("T"))
-        valueToStore = new Date(startTimeString).toISOString();
-      else {
-        const jsDate = new Date();
-        const [h = "0", m = "0"] = startTimeString.split(":");
-        jsDate.setUTCHours(Number(h), Number(m), 0, 0);
-        valueToStore = jsDate.toISOString();
-      }
-    }
+    const v = String(updatedValue);
+    valueToStore = v.includes("T")
+      ? new Date(v).toISOString()
+      : convertHHMM_2IsoTimeString(v, getTodayMidnightUTC());
+  }
 
-    try {
-      await runSql(`UPDATE events SET ${eventField} = ? WHERE event_id = ?`, [
-        valueToStore,
-        event_id,
-      ]);
-      return { success: "Field updated" };
-    } catch (error) {
-      return { error: `Error updating event: ${error}` };
-    }
+  try {
+    await runSql(
+      `UPDATE events SET ${eventField} = ? WHERE event_id = ?`,
+      [valueToStore, event_id]
+    );
+    return { success: "Field updated" };
+  } catch (error) {
+    return { error: `Error updating event: ${error}` };
   }
 };
+
 
 // Delete event
 export const deleteEvent = async (event_id: string) => {
@@ -251,5 +241,20 @@ export const tickEvent = async (event_id: string) => {
     return { success: "Event ticked" };
   } catch (error) {
     return { error: `Error ticking event: ${error}` };
+  }
+};
+
+
+export const untickEvent = async (event_id: string) => {
+  try {
+    await runSql(
+      `UPDATE events
+       SET No_of_times_checked = MAX(No_of_times_checked - 1, 0)
+       WHERE event_id = ?`,
+      [event_id]
+    );
+    return { success: "Event unticked" };
+  } catch (error) {
+    return { error: `Error unticking event: ${error}` };
   }
 };

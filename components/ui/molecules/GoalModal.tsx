@@ -2,11 +2,12 @@ import { View } from "react-native";
 import { LsAlertContainer } from "../atoms/AlertModalContainer";
 import { LsButton } from "../atoms/LsButton";
 import { LsText, Title } from "../atoms/Title";
+import { ReactNode } from "react";
 
 type LsGoalProps = {
   title: string;
   scheduled: string;
-  message: string;
+  message: ReactNode;
   open: boolean;
   dismissModal: () => void;
   ButtonText: string;

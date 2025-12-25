@@ -1,11 +1,26 @@
-import { Title } from "@/components/ui/atoms/Title";
+import { LsText, Title } from "@/components/ui/atoms/Title";
 import { LsGoalModal } from "@/components/ui/molecules/GoalModal";
 import { LsPanel } from "@/components/ui/molecules/LsPanel";
 import { useDb } from "@/context/useBackend";
-import { Event } from "@/lib/CRUDE_sqlite";
+import { Event, untickEvent } from "@/lib/CRUDE_sqlite";
 import { useLocalSearchParams } from "expo-router/build/hooks";
 import React, { useState } from "react";
-import { Dimensions, ScrollView, View } from "react-native";
+import { Dimensions, ScrollView, Text, View } from "react-native";
+
+//update event or check event:
+// we use local storage here.
+// when an event is clicked, we note in local storage that such an event was clicked once. if the event is unclicked we subtract 1 from from that event.
+//after this we can then update our sqlite db: no of times checked column
+//on click event and click on check, local storage todaysEventUpdate = {indexDay1: 1};
+//click second event for the day and click on check, local storage todaysEventUpdate = {indexDay1: 1, indexInDay2:1};
+//on click event one and click on now we should see uncheck, local storage todaysEventUpdate = {indexDay1: indexDay2:1};b
+// we can the use the object to update our number of times checked by adding all the clicked events and updating the our sqlite no of times checked.
+// clean up: we would need to clean up each day, so the number of events of a previous day to over lap into the currnt day. to do so, we need to...
+//take note of today. and it if does not tally with the date saved in local storage, we delete the entire event hstory from our local storage before stratinng tracking.
+//e.g {today:Date, indexDay1: ...};
+//if (todaysEventUpdate.today != new Date()...){} //delete the local storage and start afresh.
+
+//updatting the db:
 
 // ---------------------------
 // Utils
@@ -28,26 +43,27 @@ export const formatRelativeDate = (inputDate: string | Date) => {
   return `${Math.abs(diffDays)} days ago`;
 };
 
-const calculateEventTime = (
-  startTime: string | Date,
-  intervalHours: number,
-  eventIndex: number
-) => {
-  const start = new Date(startTime);
-  const msToAdd = intervalHours * eventIndex * 60 * 60 * 1000;
-  return new Date(start.getTime() + msToAdd);
-};
-
 type EventStatus = "missed" | "checked" | "not ready";
+
+const isSameDayUTC = (a: Date, b: Date) =>
+  a.getUTCFullYear() === b.getUTCFullYear() &&
+  a.getUTCMonth() === b.getUTCMonth() &&
+  a.getUTCDate() === b.getUTCDate();
 
 const getEventStatus = (
   eventTime: Date,
-  eventIndex: number,
-  numberOfTimesChecked: number
+  indexInDay: number,
+  todayCheckedCount: number
 ): EventStatus => {
   const now = new Date();
+
   if (eventTime > now) return "not ready";
-  if (eventIndex < numberOfTimesChecked) return "checked";
+
+  if (isSameDayUTC(eventTime, now)) {
+    return indexInDay < todayCheckedCount ? "checked" : "missed";
+  }
+
+  // past days
   return "missed";
 };
 
@@ -130,6 +146,12 @@ const GoalDetails = () => {
   const cardSize =
     (screenWidth - cardMargin * (cardsPerRow * 2) - 20) / cardsPerRow;
 
+  //handle checking and unchecking
+  const now = new Date();
+  const eventDate = new Date(selectedEvent?.scheduledAt ?? "");
+
+  const canUpdate = isSameDayUTC(eventDate, now) && eventDate <= now;
+
   return (
     <View style={{ flex: 1, alignItems: "center", paddingVertical: 10 }}>
       <Title variant="lg" color="black">
@@ -147,17 +169,14 @@ const GoalDetails = () => {
         }}
       >
         {streakEvents.map((event, index) => {
-          const eventTime = calculateEventTime(
-            event.scheduledAt,
-            goalData.timeInterval,
-            event.indexInDay
-          );
+          const eventTime = new Date(event.scheduledAt);
 
           const eventStatus = getEventStatus(
             eventTime,
-            index,
+            event.indexInDay,
             goalData.No_of_times_checked
           );
+
           const cardAppearance = getCardAppearance(eventStatus);
 
           return (
@@ -166,7 +185,6 @@ const GoalDetails = () => {
               cardAppearance={cardAppearance}
               cardMargin={cardMargin}
               cardSize={cardSize}
-              
               onPanelPress={() => setSelectedEvent(event)}
               status={eventStatus}
               text={formatRelativeDate(event.scheduledAt)}
@@ -182,9 +200,31 @@ const GoalDetails = () => {
           open={!!selectedEvent}
           title={selectedEvent.eventName}
           scheduled={new Date(selectedEvent.scheduledAt).toLocaleString()}
-          message={`Day: ${selectedEvent.dayIndex}         Daily Check:${selectedEvent.indexInDay}`}
-          dismissModal={() => setSelectedEvent(null)}
-          ButtonText="Close"
+          message={
+            <Text>
+              <LsText variant="sm" align="left">
+                Day: ${selectedEvent.dayIndex}{" "}
+              </LsText>
+              {`
+               `}
+              <LsText variant="sm" align="left">
+                Daily Check:${selectedEvent.indexInDay}
+              </LsText>
+              {`
+              
+              `}
+              {!canUpdate && (
+                <LsText variant="sm" align="left">
+                  Events not occouring today cannot be updated
+                </LsText>
+              )}
+            </Text>
+          }
+          dismissModal={() => {
+            setSelectedEvent(null);
+            untickEvent(selectedEvent.eventId);
+          }}
+          ButtonText={canUpdate ? "check event" : "close"}
         />
       )}
     </View>
