@@ -1,11 +1,11 @@
-import { LsText, Title } from "@/components/ui/atoms/Title";
+import { Title } from "@/components/ui/atoms/Title";
 import { LsGoalModal } from "@/components/ui/molecules/GoalModal";
+import { LsPanel } from "@/components/ui/molecules/LsPanel";
 import { useDb } from "@/context/useBackend";
 import { Event } from "@/lib/CRUDE_sqlite";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router/build/hooks";
 import React, { useState } from "react";
-import { Dimensions, ScrollView, TouchableOpacity, View } from "react-native";
+import { Dimensions, ScrollView, View } from "react-native";
 
 // ---------------------------
 // Utils
@@ -161,45 +161,16 @@ const GoalDetails = () => {
           const cardAppearance = getCardAppearance(eventStatus);
 
           return (
-            <TouchableOpacity
+            <LsPanel
               key={`${event.eventId}_${index}`}
-              style={{
-                width: cardSize,
-                height: cardSize,
-                borderRadius: 8,
-                borderWidth: 1,
-                borderColor: "black",
-                margin: cardMargin,
-                justifyContent: "center",
-                alignItems: "center",
-                backgroundColor: "#fff",
-                overflow: "hidden",
-              }}
-              onPress={() => setSelectedEvent(event)}
-            >
-              {/* Faded background icon */}
-              <MaterialCommunityIcons
-                name={cardAppearance.icon}
-                size={cardSize * 0.8}
-                color={`${cardAppearance.backgroundColor}33`}
-                style={{
-                  position: "absolute",
-                  top: "10%",
-                  left: "10%",
-                  zIndex: 0,
-                }}
-              />
-
-              {/* Card text */}
-              <View style={{ zIndex: 1, alignItems: "center" }}>
-                <LsText variant="sm" color="black" align="center">
-                  {formatRelativeDate(event.scheduledAt)}
-                </LsText>
-                <LsText variant="sm" color="black" align="center">
-                  {eventStatus}
-                </LsText>
-              </View>
-            </TouchableOpacity>
+              cardAppearance={cardAppearance}
+              cardMargin={cardMargin}
+              cardSize={cardSize}
+              
+              onPanelPress={() => setSelectedEvent(event)}
+              status={eventStatus}
+              text={formatRelativeDate(event.scheduledAt)}
+            />
           );
         })}
       </ScrollView>

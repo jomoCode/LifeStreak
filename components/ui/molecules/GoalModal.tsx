@@ -18,7 +18,6 @@ export const LsGoalModal = ({
   message,
   open,
   dismissModal,
-
   ButtonText,
 }: LsGoalProps) => {
   //   const colors = useColors();
@@ -32,8 +31,8 @@ export const LsGoalModal = ({
       <View
         style={{
           flex: 1,
-          justifyContent:'space-evenly',
-          alignItems:'center',
+          justifyContent: "space-evenly",
+          alignItems: "center",
           padding: 20,
         }}
       >
