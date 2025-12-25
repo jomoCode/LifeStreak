@@ -1,16 +1,11 @@
 import { LsText, Title } from "@/components/ui/atoms/Title";
+import { LsGoalModal } from "@/components/ui/molecules/GoalModal";
 import { useDb } from "@/context/useBackend";
 import { Event } from "@/lib/CRUDE_sqlite";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router/build/hooks";
 import React, { useState } from "react";
-import {
-  Dimensions,
-  Modal,
-  ScrollView,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Dimensions, ScrollView, TouchableOpacity, View } from "react-native";
 
 // ---------------------------
 // Utils
@@ -210,57 +205,17 @@ const GoalDetails = () => {
       </ScrollView>
 
       {/* Modal for full details */}
-      <Modal
-        visible={!!selectedEvent}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setSelectedEvent(null)}
-      >
-        {selectedEvent && (
-          <View
-            style={{
-              flex: 1,
-              justifyContent: "center",
-              alignItems: "center",
-              backgroundColor: "rgba(0,0,0,0.5)",
-              padding: 20,
-            }}
-          >
-            <View
-              style={{
-                width: "100%",
-                backgroundColor: "white",
-                borderRadius: 10,
-                padding: 20,
-              }}
-            >
-              <Title variant="med" color="black">{selectedEvent.eventName}</Title>
-              <LsText variant="sm" color="black">
-                Scheduled:{" "}
-                {new Date(selectedEvent.scheduledAt).toLocaleString()}
-              </LsText>
-              <LsText variant="sm" color="black">
-                Day Index: {selectedEvent.dayIndex}, Event Index:{" "}
-                {selectedEvent.indexInDay}
-              </LsText>
-              <TouchableOpacity
-                onPress={() => setSelectedEvent(null)}
-                style={{
-                  marginTop: 10,
-                  backgroundColor: "#333",
-                  padding: 10,
-                  borderRadius: 5,
-                  alignItems: "center",
-                }}
-              >
-                <LsText variant="sm">
-                  Close
-                </LsText>
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
-      </Modal>
+
+      {selectedEvent && (
+        <LsGoalModal
+          open={!!selectedEvent}
+          title={selectedEvent.eventName}
+          scheduled={new Date(selectedEvent.scheduledAt).toLocaleString()}
+          message={`Day: ${selectedEvent.dayIndex}         Daily Check:${selectedEvent.indexInDay}`}
+          dismissModal={() => setSelectedEvent(null)}
+          ButtonText="Close"
+        />
+      )}
     </View>
   );
 };
