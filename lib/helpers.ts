@@ -1,4 +1,4 @@
-import crypto from "crypto";
+import { randomUUID } from "expo-crypto";
 import { Schedule, TimeWindow, Weekday } from "../types";
 import { CreateTask } from "./streakEngine";
 
@@ -71,7 +71,7 @@ export const normalizeCreateTaskInput = (
 };
 
 export const id = () => {
-  return crypto.randomUUID();
+  return randomUUID();
 };
 
 export const toDateOnlyString = (date: Date): string => {

@@ -19,7 +19,7 @@ const EventTitle = () => {
   const { control, getValues } = useFormContext<CreateStreakFormProps>();
   const nextStep = () => {
     try {
-      const event = getValues("event_name");
+      const event = getValues("name");
       if (!event) {
         throw new Error("Please enter a streak title");
       }
@@ -31,14 +31,8 @@ const EventTitle = () => {
       if (event.length > 50) {
         throw new Error("Streak title must be 50 characters or less");
       }
-      
-    
-    
-    
+
       router.push("/CreateEvents/Date");
-    
-    
-    
     } catch (error: unknown | Error) {
       const errorObj = error as Error;
       setErr(errorObj?.message);
@@ -47,7 +41,7 @@ const EventTitle = () => {
 
   return (
     <CreateEvent
-      field="event_name"
+      field="name"
       moveToNextStep={nextStep}
       title="What habit do you want to build?"
     >
@@ -73,7 +67,7 @@ const EventTitle = () => {
             {err && <Text style={{ color: "red" }}>{err}</Text>}
           </View>
         )}
-        name="event_name"
+        name="name"
       />
     </CreateEvent>
   );
