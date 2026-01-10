@@ -1,3 +1,5 @@
+import { Task } from "@/types";
+
 const __DEV__ = process.env.NODE_ENV !== "production";
 
 /**
@@ -112,30 +114,18 @@ const convertHHMM_2IsoTimeString = (timeString: string, isoDate: string) => {
 
 // Default filter
 
-const filterByCreationDate = (data: Event[]) => {
-  const totalNumberOfItems = data.length;
 
-  // Move through the array n times
-  for (let unsorted = 0; unsorted < totalNumberOfItems; unsorted++) {
-    let index = unsorted;
-    // Find the largest item in the unsorted array
-    for (let i = unsorted; i < totalNumberOfItems; i++) {
-      if (
-        Number(data[unsorted].event_id.split("_")[1]) <
-        Number(data[i].event_id.split("_")[1])
-      ) {
-        index = i;
-      }
-    }
-    // Swap sorted item to begining of array
-    [data[unsorted], data[index]] = [data[index], data[unsorted]];
-  }
-  return data;
+
+const filterByCreationDate = (data: Task[]) => {
+  return [...data].sort(
+    (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+  );
 };
 
-const filterByAlphabeticOrder = (data: Event[]) => {
+
+const filterByAlphabeticOrder = (data: Task[]) => {
   return [...data].sort((a, b) =>
-    a.event_name.localeCompare(b.event_name, undefined, {
+    a.name.localeCompare(b.name, undefined, {
       sensitivity: "base",
     })
   );
