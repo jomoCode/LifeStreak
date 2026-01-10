@@ -18,18 +18,20 @@ import {
 import { ActionButton } from "../atoms/ActionButton";
 import { Title } from "../atoms/Title";
 import { LsGoal } from "../molecules/LsGoal";
+import { Task } from "@/types";
 
 export const Events = () => {
   const [refreshing, setRefreshing] = useState(false);
   const router = useRouter();
   const { data, loading, refresh } = useDb();
-  const [goals, setGoals] = useState(data);
+  const [goals, setGoals] = useState<Task[]>(data);
   const styles = useScreenStyles();
   const colors = useColors();
 
   useEffect(() => {
     setGoals(data);
   }, [data]);
+
   const onRefresh = async () => {
     setRefreshing(true);
     refresh();
@@ -46,24 +48,22 @@ export const Events = () => {
         }}
       >
         <Title variant="lg">Goals</Title>
+
         <View style={{ flexDirection: "row", gap: 10 }}>
           <TouchableOpacity
-            onPress={() => {
-              setGoals(filterByCreationDate(data));
-            }}
+            onPress={() => setGoals(filterByCreationDate(data))}
           >
             <Title variant="sm">
               <MaterialCommunityIcons name="filter" color={colors.button} />
               <MaterialCommunityIcons
                 name="sort-ascending"
                 color={colors.button}
-              />{" "}
+              />
             </Title>
           </TouchableOpacity>
+
           <TouchableOpacity
-            onPress={() => {
-              setGoals(filterByAlphabeticOrder(data));
-            }}
+            onPress={() => setGoals(filterByAlphabeticOrder(data))}
           >
             <Title variant="sm" color={colors.button}>
               <MaterialCommunityIcons name="filter" color={colors.button} />
@@ -72,18 +72,21 @@ export const Events = () => {
           </TouchableOpacity>
         </View>
       </View>
+
       {loading && data.length === 0 ? (
-        <Text>Loading events...</Text>
+        <Text>Loading tasks...</Text>
       ) : (
         <FlatList
           data={goals}
-          keyExtractor={(item) => item.event_id}
+          keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <LsGoal
-              streakName={item.event_name}
-              onPress={() => {
-                router.push(`/HandleGoals/GoalDetails?goalId=${item.event_id}`);
-              }}
+              streakName={item.name}
+              onPress={() =>
+                router.push(
+                  `/HandleGoals/GoalDetails?goalId=${item.id}`
+                )
+              }
             />
           )}
           ListEmptyComponent={
@@ -94,10 +97,9 @@ export const Events = () => {
           }
         />
       )}
+
       <ActionButton
-        handleSubmit={() => {
-          router.push("/CreateEvents");
-        }}
+        handleSubmit={() => router.push("/CreateEvents")}
       />
     </View>
   );
