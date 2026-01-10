@@ -31,7 +31,14 @@ const EventTitle = () => {
       if (event.length > 50) {
         throw new Error("Streak title must be 50 characters or less");
       }
-      router.push("/CreateEvents/StartDate");
+      
+    
+    
+    
+      router.push("/CreateEvents/Date");
+    
+    
+    
     } catch (error: unknown | Error) {
       const errorObj = error as Error;
       setErr(errorObj?.message);
