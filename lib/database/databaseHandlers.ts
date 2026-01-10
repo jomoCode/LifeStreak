@@ -178,3 +178,46 @@ export const readTasksAsync = async (db: SQLiteDB): Promise<Task[]> => {
 };
 
 
+/* ----------------------------------------------------------------------------------------
+--------------------------------READ OCCURRENCES-------------------------------------------
+*/
+
+/**
+ * Reads all occurrences for a specific task.
+ *
+ * This function is intentionally simple:
+ * - It does not infer "missed" or "checked"
+ * - It does not modify status
+ * - It only returns what exists in the database
+ *
+ * Any higher-level logic (UI status, streaks, summaries)
+ * should be derived outside this layer.
+ */
+export const readOccurrencesByTaskAsync = async (
+  db: SQLiteDB,
+  taskId: string
+): Promise<TaskOccurrence[]> => {
+  const stmt = `
+    SELECT
+      id,
+      task_id,
+      date,
+      status,
+      checked_at
+    FROM task_occurrences
+    WHERE task_id = ?
+    ORDER BY date ASC
+  `;
+
+  // Fetch raw rows from SQLite
+  const result = await db.getAllAsync<any>(stmt, [taskId]);
+
+  // Normalize rows into TaskOccurrence objects
+  return result.map((row) => ({
+    id: row.id,
+    taskId: row.task_id,
+    date: row.date, // YYYY-MM-DD, stored as-is
+    status: row.status,
+    checkedAt: row.checked_at ?? undefined,
+  }));
+};

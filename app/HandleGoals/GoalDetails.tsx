@@ -2,10 +2,13 @@ import { LsText, Title } from "@/components/ui/atoms/Title";
 import { LsGoalModal } from "@/components/ui/molecules/GoalModal";
 import { LsPanel } from "@/components/ui/molecules/LsPanel";
 import { useDb } from "@/context/useBackend";
-import { Event, untickEvent } from "@/lib/CRUDE_sqlite";
+import { useOccurrences } from "@/hooks/useOccourences";
+import { markOccurrenceChecked } from "@/lib/database/helpers";
+import { buildOccurrenceCards, mapOccurrenceStatus } from "@/lib/helpers";
+import { TaskOccurrenceStatus } from "@/lib/streakEngine";
 import { useLocalSearchParams } from "expo-router/build/hooks";
 import React, { useState } from "react";
-import { Dimensions, ScrollView, Text, View } from "react-native";
+import { Dimensions, ScrollView, View } from "react-native";
 
 //update event or check event:
 // we use local storage here.
@@ -43,30 +46,6 @@ export const formatRelativeDate = (inputDate: string | Date) => {
   return `${Math.abs(diffDays)} days ago`;
 };
 
-type EventStatus = "missed" | "checked" | "not ready";
-
-const isSameDayUTC = (a: Date, b: Date) =>
-  a.getUTCFullYear() === b.getUTCFullYear() &&
-  a.getUTCMonth() === b.getUTCMonth() &&
-  a.getUTCDate() === b.getUTCDate();
-
-const getEventStatus = (
-  eventTime: Date,
-  indexInDay: number,
-  todayCheckedCount: number
-): EventStatus => {
-  const now = new Date();
-
-  if (eventTime > now) return "not ready";
-
-  if (isSameDayUTC(eventTime, now)) {
-    return indexInDay < todayCheckedCount ? "checked" : "missed";
-  }
-
-  // past days
-  return "missed";
-};
-
 const getCardAppearance = (status: EventStatus) => {
   switch (status) {
     case "missed":
@@ -81,81 +60,47 @@ const getCardAppearance = (status: EventStatus) => {
 // ---------------------------
 // Event Generation
 // ---------------------------
-type GeneratedEvent = {
-  eventId: string;
-  eventName: string;
-  scheduledAt: string;
-  dayIndex: number;
-  indexInDay: number;
-};
 
-const generateEvents = (eventData: Event): GeneratedEvent[] => {
-  const events: GeneratedEvent[] = [];
-  const startDay = new Date(eventData.startDate);
-  const firstEventTime = new Date(eventData.startTime);
-
-  let activeDayIndex = 0;
-  for (
-    let dayOffset = 0;
-    dayOffset < eventData.duration;
-    dayOffset += eventData.interval
-  ) {
-    const dayDate = new Date(startDay);
-    dayDate.setUTCDate(startDay.getUTCDate() + dayOffset);
-
-    for (let i = 0; i < eventData.timesPerDay; i++) {
-      const eventTime = new Date(dayDate);
-      eventTime.setUTCHours(
-        firstEventTime.getUTCHours() + i * eventData.timeInterval
-      );
-      eventTime.setUTCMinutes(firstEventTime.getUTCMinutes());
-      eventTime.setUTCSeconds(firstEventTime.getUTCSeconds());
-      eventTime.setUTCMilliseconds(firstEventTime.getUTCMilliseconds());
-
-      events.push({
-        eventId: eventData.event_id,
-        eventName: eventData.event_name,
-        scheduledAt: eventTime.toISOString(),
-        dayIndex: activeDayIndex,
-        indexInDay: i,
-      });
-    }
-    activeDayIndex++;
-  }
-  return events;
-};
+type EventStatus = "missed" | "checked" | "not ready";
 
 // ---------------------------
 // GoalDetails Component
 // ---------------------------
+// GoalDetails.tsx
+
 const GoalDetails = () => {
   const { data } = useDb();
   const { goalId } = useLocalSearchParams<{ goalId: string }>();
-  const goalData = data.find((d) => d.event_id === goalId);
-  const [selectedEvent, setSelectedEvent] = useState<GeneratedEvent | null>(
-    null
-  );
 
-  if (!goalData) return null;
-  const streakEvents = generateEvents(goalData);
+  const task = data.find((t) => t.id === goalId);
+  const { occurrences } = useOccurrences(goalId ?? "");
 
-  // Calculate card size for 4 per row on larger screens
+  const [selected, setSelected] = useState<{
+    id: string;
+    scheduledAt: Date;
+    status: TaskOccurrenceStatus;
+  } | null>(null);
+
+  if (!task) return null;
+
+  const cards = buildOccurrenceCards(task, occurrences);
+
   const screenWidth = Dimensions.get("window").width;
   const cardMargin = 5;
   const cardsPerRow = 4;
   const cardSize =
     (screenWidth - cardMargin * (cardsPerRow * 2) - 20) / cardsPerRow;
 
-  //handle checking and unchecking
   const now = new Date();
-  const eventDate = new Date(selectedEvent?.scheduledAt ?? "");
-
-  const canUpdate = isSameDayUTC(eventDate, now) && eventDate <= now;
+  const canUpdate =
+    selected &&
+    selected.scheduledAt <= now &&
+    selected.scheduledAt.toDateString() === now.toDateString();
 
   return (
     <View style={{ flex: 1, alignItems: "center", paddingVertical: 10 }}>
       <Title variant="lg" color="black">
-        Goal: {goalData.event_name}
+        Goal: {task.name}
       </Title>
 
       <ScrollView
@@ -168,63 +113,45 @@ const GoalDetails = () => {
           gap: 10,
         }}
       >
-        {streakEvents.map((event, index) => {
-          const eventTime = new Date(event.scheduledAt);
+        {cards.map((card) => {
+          const status = mapOccurrenceStatus(card.scheduledAt, card.status);
 
-          const eventStatus = getEventStatus(
-            eventTime,
-            event.indexInDay,
-            goalData.No_of_times_checked
-          );
-
-          const cardAppearance = getCardAppearance(eventStatus);
+          const appearance = getCardAppearance(status);
 
           return (
             <LsPanel
-              key={`${event.eventId}_${index}`}
-              cardAppearance={cardAppearance}
+              key={card.id}
+              cardAppearance={appearance}
               cardMargin={cardMargin}
               cardSize={cardSize}
-              onPanelPress={() => setSelectedEvent(event)}
-              status={eventStatus}
-              text={formatRelativeDate(event.scheduledAt)}
+              onPanelPress={() => setSelected(card)}
+              status={status}
+              text={formatRelativeDate(card.scheduledAt)}
             />
           );
         })}
       </ScrollView>
 
-      {/* Modal for full details */}
-
-      {selectedEvent && (
+      {selected && (
         <LsGoalModal
-          open={!!selectedEvent}
-          title={selectedEvent.eventName}
-          scheduled={new Date(selectedEvent.scheduledAt).toLocaleString()}
+          open
+          title={task.name}
+          scheduled={selected.scheduledAt.toLocaleString()}
           message={
-            <Text>
-              <LsText variant="sm" align="left">
-                Day: ${selectedEvent.dayIndex}{" "}
-              </LsText>
-              {`
-               `}
-              <LsText variant="sm" align="left">
-                Daily Check:${selectedEvent.indexInDay}
-              </LsText>
-              {`
-              
-              `}
-              {!canUpdate && (
-                <LsText variant="sm" align="left">
-                  Events not occouring today cannot be updated
-                </LsText>
-              )}
-            </Text>
+            <LsText variant="sm" align="left">
+              This occurrence is scheduled for today.
+            </LsText>
           }
-          dismissModal={() => {
-            setSelectedEvent(null);
-            untickEvent(selectedEvent.eventId);
-          }}
           ButtonText={canUpdate ? "check event" : "close"}
+          dismissModal={async () => {
+            if (canUpdate) {
+              await markOccurrenceChecked(
+                selected.id,
+                selected.scheduledAt.toISOString().split("T")[0] // YYYY-MM-DD
+              );
+            }
+            setSelected(null);
+          }}
         />
       )}
     </View>

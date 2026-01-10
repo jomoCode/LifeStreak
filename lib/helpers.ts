@@ -1,6 +1,10 @@
 import { randomUUID } from "expo-crypto";
-import { Schedule, TimeWindow, Weekday } from "../types";
-import { CreateTask } from "./streakEngine";
+import { Schedule, Task, TimeWindow, Weekday } from "../types";
+import {
+  CreateTask,
+  TaskOccurrence,
+  TaskOccurrenceStatus,
+} from "./streakEngine";
 
 type ValidateCreateTaskInput = Partial<CreateTask>;
 
@@ -84,4 +88,43 @@ export const weekdayFromDate = (date: Date): Weekday => {
   return date
     .toLocaleDateString("en-US", { weekday: "long" })
     .toLowerCase() as Weekday;
+};
+
+// occurrenceAdapter.ts
+
+export type OccurrenceCard = {
+  id: string;
+  taskId: string;
+  scheduledAt: Date;
+  status: TaskOccurrenceStatus;
+};
+
+/**
+ * Converts TaskOccurrence records into UI-friendly cards.
+ * Applies the task's time window to build a full Date object.
+ */
+
+export const buildOccurrenceCards = (
+  task: Task,
+  occurrences: TaskOccurrence[]
+): OccurrenceCard[] => {
+  return occurrences.map((occ) => ({
+    id: occ.id,
+    taskId: occ.taskId,
+    scheduledAt: new Date(`${occ.date}T${task.timeWindow.start}`),
+    status: occ.status,
+  }));
+};
+
+type EventStatus = "missed" | "checked" | "not ready";
+
+export const mapOccurrenceStatus = (
+  scheduledAt: Date,
+  status: TaskOccurrenceStatus
+): EventStatus => {
+  const now = new Date();
+
+  if (scheduledAt > now) return "not ready";
+  if (status === "checked") return "checked";
+  return "missed";
 };
