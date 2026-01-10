@@ -11,7 +11,6 @@ import { initDBAsync } from "@/lib/database/initializeDb";
 import { createTask, generateTaskOccurrences } from "@/lib/streakEngine";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import * as SQLite from "expo-sqlite";
 import React, { useState } from "react";
 import { SubmitHandler, useFormContext } from "react-hook-form";
 import { Text, View } from "react-native";
@@ -42,7 +41,6 @@ const ReviewScreen = () => {
     start: getValues("startTime"),
   };
 
-
   const scheduleLabel =
     schedule?.type === "daily"
       ? "Every day"
@@ -51,8 +49,17 @@ const ReviewScreen = () => {
       : "--";
 
   const submit: SubmitHandler<CreateStreakFormProps> = (data) => {
+    const task = {
+      schedule: schedule,
+      startDate: startDate,
+      endDate: endDate,
+      totalDays: totalDays,
+      name: name,
+      timeWindow: timeWindow,
+    };
+
     try {
-      const task = createTask(data, async (id, task) => {
+      createTask(task, async (id, task) => {
         const db = await initDBAsync();
 
         insertTaskAsync(db, task);
