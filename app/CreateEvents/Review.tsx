@@ -4,7 +4,6 @@ import { CreateStreakFormProps } from "@/context/CreateStreakForm_";
 import { useGeneralStyles } from "@/hooks/styles/useStyles";
 import { useColors } from "@/hooks/useColors";
 import { createEvent } from "@/lib/CRUDE_sqlite";
-import { formatTimeTo12Hour } from "@/lib/generic_helpers";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -19,68 +18,57 @@ const ReviewScreen = () => {
     action: () => any;
     button: string;
   } | null>(null);
+
   const { getValues, handleSubmit, reset } =
     useFormContext<CreateStreakFormProps>();
+
   const styles = useGeneralStyles();
   const colors = useColors();
   const router = useRouter();
-  const duration = getValues("duration");
-  const goal = getValues("event_name");
-  const interval = getValues("interval");
-  const startDay = getValues("startDate");
-  const startTime = getValues("startTime");
-  const timesPerDay = getValues("timesPerDay");
+
+  const name = getValues("name");
+  const schedule = getValues("schedule");
+  const startDate = getValues("startDate");
+  const endDate = getValues("endDate");
+  const totalDays = getValues("totalDays");
+  const timeWindow = {end: getValues("endTime"), start: getValues("startTime")  };
+
+  const scheduleLabel =
+    schedule?.type === "daily"
+      ? "Every day"
+      : schedule?.type === "custom"
+      ? `On ${schedule.days.join(", ")}`
+      : "--";
 
   const submit: SubmitHandler<CreateStreakFormProps> = async (data) => {
     try {
-      // Convert numeric fields
-      const fixedData = {
-        ...data,
-        interval: Number(data.interval),
-        duration: Number(data.duration),
-        timesPerDay: Number(data.timesPerDay),
-        timeInterval: Number(data.timeInterval),
-      };
-
-      // Call your createEvent function
-      const result = await createEvent({
-        event_name: fixedData.event_name,
-        duration: fixedData.duration,
-        interval: fixedData.interval,
-        startDate: fixedData.startDate, // ISO string or Date string
-        startTime: fixedData.startTime, // ISO string or "HH:mm"
-        timesPerDay: fixedData.timesPerDay,
-        timeInterval: fixedData.timeInterval,
-      });
+      const result = await createEvent(data);
 
       if ("success" in result) {
         setAlert({
           title: "Success",
           type: "success",
-          message: "Event created successfully",
+          message: "Task created successfully",
           action: () => {
+            reset();
             router.push("/");
           },
           button: "Continue",
         });
-
-        reset();
       } else {
         throw new Error(result.error);
       }
-    } catch (error: unknown | Error) {
-      const errorObj = error as Error;
-      const errorMessage = errorObj.message;
-
+    } catch (error: any) {
       setAlert({
-        title: "Failed to create streak!",
-        message: errorMessage ? errorMessage : "Error creating events",
+        title: "Failed to create task",
         type: "error",
+        message: error?.message ?? "Error creating task",
         button: "Try again",
         action: () => {},
       });
     }
   };
+
   return (
     <View
       style={{
@@ -92,68 +80,85 @@ const ReviewScreen = () => {
     >
       <View>
         <Text style={styles.crePageLabel}>
-          <Text style={{ color: colors.button }}>In {duration} days</Text>{" "}
-          you’ll have made progress on{" "}
-          <Text style={{ color: colors.button, display: "none" }}>
-            &quot;{goal}&quot;
-          </Text>
+          You’re about to start{" "}
+          <Text style={{ color: colors.button }}>{name}</Text>
         </Text>
 
         <Text style={{ fontSize: 18, fontWeight: "600", marginTop: 12 }}>
-          Here’s how your streak will work:
+          Here’s how it will work:
         </Text>
+
         <View style={{ gap: 8, marginLeft: 4 }}>
-          <Text style={{ fontSize: 18, lineHeight: 22 }}>
+          <Text style={{ fontSize: 16 }}>
             <MaterialCommunityIcons
               name="circle"
               color={colors.button}
               size={12}
             />{" "}
-            {timesPerDay} check-in{timesPerDay > 1 ? "s" : ""} per day
+            {scheduleLabel}
           </Text>
-          <Text style={{ fontSize: 16, lineHeight: 22 }}>
+
+          <Text style={{ fontSize: 16 }}>
             <MaterialCommunityIcons
               name="circle"
               color={colors.button}
               size={12}
             />{" "}
-            {interval === 1 ? "Every day" : `Once every ${interval} days`}
+            Starts on{" "}
+            {new Date(startDate).toLocaleDateString(undefined, {
+              weekday: "long",
+              month: "short",
+              day: "numeric",
+            })}
           </Text>
-          <Text style={{ fontSize: 16, lineHeight: 22 }}>
-            <MaterialCommunityIcons
-              name="circle"
-              color={colors.button}
-              size={12}
-            />{" "}
-            First check-in:{" "}
-            <Text style={{ color: colors.button, fontWeight: "bold" }}>
-              {new Date(startDay).toLocaleDateString(undefined, {
-                weekday: "long",
-                month: "short",
-                day: "numeric",
-              })}
-            </Text>{" "}
-            -{" "}
-            <Text style={{ color: colors.button, fontWeight: "bold" }}>
-              {startTime? formatTimeTo12Hour(startTime): '------'}
+
+          {totalDays && (
+            <Text style={{ fontSize: 16 }}>
+              <MaterialCommunityIcons
+                name="circle"
+                color={colors.button}
+                size={12}
+              />{" "}
+              Runs for {totalDays} days
             </Text>
-          </Text>
+          )}
+
+          {endDate && (
+            <Text style={{ fontSize: 16 }}>
+              <MaterialCommunityIcons
+                name="circle"
+                color={colors.button}
+                size={12}
+              />{" "}
+              Ends on {new Date(endDate).toLocaleDateString()}
+            </Text>
+          )}
+
+          {timeWindow && (
+            <Text style={{ fontSize: 16 }}>
+              <MaterialCommunityIcons
+                name="circle"
+                color={colors.button}
+                size={12}
+              />{" "}
+              Between{" "}
+              <Text style={{ fontWeight: "bold", color: colors.button }}>
+                {timeWindow.start} – {timeWindow.end}
+              </Text>
+            </Text>
+          )}
         </View>
       </View>
 
       <View style={{ marginTop: 16, width: "100%" }}>
-        <LsButton
-          onPress={async () => {
-            handleSubmit(submit)();
-          }}
-          length="long"
-        >
+        <LsButton onPress={handleSubmit(submit)} length="long">
           <Text style={{ fontSize: 16, fontWeight: "700", color: "white" }}>
-            Create my streak{" "}
-            <MaterialCommunityIcons name="fire" size={20} color="yellow" />
+            Create my task{" "}
+            <MaterialCommunityIcons name="check" size={20} color="white" />
           </Text>
         </LsButton>
       </View>
+
       {alert && (
         <LsAlert
           open={!!alert.message}

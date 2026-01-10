@@ -71,7 +71,7 @@ const StartTimeScreen = () => {
       return;
     }
 
-    router.push("/CreateEvents/StreakDuration");
+    router.push("/CreateEvents/Schedule");
   };
 
   /* ------------------ UI ------------------ */
