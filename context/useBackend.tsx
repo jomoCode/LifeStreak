@@ -1,4 +1,3 @@
-import { Event, readEvents } from "@/lib/CRUDE_sqlite";
 import {
   createContext,
   ReactNode,
@@ -6,65 +5,45 @@ import {
   useEffect,
   useState,
 } from "react";
+import { Task } from "@/types";
+import { initDBAsync } from "@/lib/database/initializeDb";
+import { readTasksAsync } from "@/lib/database/databaseHandlers";
 
 type DbProviderProps = { children: ReactNode };
+
 type BackendContextProps = {
   loading: boolean;
-  data: Event[];
+  data: Task[];
   refresh: () => void;
 };
+
 const BackendContext = createContext<BackendContextProps | undefined>(
   undefined
 );
 
 export const DbProvider = ({ children }: DbProviderProps) => {
-  const [data, setData] = useState<Event[]>([]);
+  const [data, setData] = useState<Task[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Toggle to update component state and trigger data fetching
-  const refresh = () => {
-    setRefreshing(!refreshing);
-  };
+  const refresh = () => setRefreshing((v) => !v);
 
   useEffect(() => {
-    const loadEventsFromDb = async () => {
+    const loadTasks = async () => {
+      setLoading(true);
       try {
-        // Get data from backend
-        setLoading(true);
-        const events = await readEvents();
-        if (!events) {
-          setData([]);
-          return;
-        }
-
-        // Validate data is  Errorless
-        if (typeof events === "object") {
-          if ("error" in events) {
-            console.error("Error reading events:", events.error);
-            setData([]);
-            return;
-          }
-          if ("fail" in events) {
-            setData([]);
-            return;
-          }
-          if ("pass" in events) {
-            console.log("Pass message:", events.pass);
-            setData([]);
-            return;
-          }
-        }
-        setData(events);
+        const db = await initDBAsync();
+        const tasks = await readTasksAsync(db);
+        setData(tasks);
       } catch (err) {
-        console.error("Error loading events:", err);
+        console.error("Failed to load tasks:", err);
         setData([]);
       } finally {
         setLoading(false);
       }
     };
 
-    loadEventsFromDb();
+    loadTasks();
   }, [refreshing]);
 
   return (
@@ -79,3 +58,4 @@ export const useDb = () => {
   if (!context) throw new Error("useDb must be used within DbProvider");
   return context;
 };
+

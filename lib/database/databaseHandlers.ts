@@ -127,3 +127,54 @@ generateTaskOccurrences(task, (_, occurrence) => {
  * 
  * 
  */
+/* ----------------------------------------------------------------------------------------
+-------------------------------READ TASKS----------------------------------------*/
+
+export const readTasksAsync = async (db: SQLiteDB): Promise<Task[]> => {
+  const stmt = `
+    SELECT
+      id,
+      name,
+      schedule_type,
+      schedule_days,
+      start_date,
+      end_date,
+      total_days,
+      time_start,
+      time_end,
+      status,
+      created_at,
+      updated_at
+    FROM tasks
+    ORDER BY created_at DESC
+  `;
+
+  const result = await db.getAllAsync<any>(stmt);
+
+  return result.map((row) => ({
+    id: row.id,
+    name: row.name,
+    schedule:
+      row.schedule_type === "custom"
+        ? {
+            type: "custom",
+            days: JSON.parse(row.schedule_days),
+          }
+        : { type: "daily" },
+
+    startDate: new Date(row.start_date),
+    endDate: row.end_date ? new Date(row.end_date) : undefined,
+    totalDays: row.total_days || undefined,
+
+    timeWindow: {
+      start: row.time_start,
+      end: row.time_end,
+    },
+
+    status: row.status,
+    createdAt: new Date(row.created_at),
+    updatedAt: new Date(row.updated_at),
+  }));
+};
+
+
