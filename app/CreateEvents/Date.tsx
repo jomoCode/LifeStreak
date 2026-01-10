@@ -86,7 +86,7 @@ const StartDateScreen = () => {
       return;
     }
 
-    router.push("/CreateEvents/StartTime");
+    router.push("/CreateEvents/Time");
   };
 
   /* ------------------ UI ------------------ */
