@@ -3,9 +3,15 @@ import { AlertTypeEnum, LsAlert } from "@/components/ui/molecules/AlertModal";
 import { CreateStreakFormProps } from "@/context/CreateStreakForm_";
 import { useGeneralStyles } from "@/hooks/styles/useStyles";
 import { useColors } from "@/hooks/useColors";
-import { createEvent } from "@/lib/CRUDE_sqlite";
+import {
+  insertOccurrenceAsync,
+  insertTaskAsync,
+} from "@/lib/database/databaseHandlers";
+import { initDBAsync } from "@/lib/database/initializeDb";
+import { createTask, generateTaskOccurrences } from "@/lib/streakEngine";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import * as SQLite from "expo-sqlite";
 import React, { useState } from "react";
 import { SubmitHandler, useFormContext } from "react-hook-form";
 import { Text, View } from "react-native";
@@ -31,7 +37,11 @@ const ReviewScreen = () => {
   const startDate = getValues("startDate");
   const endDate = getValues("endDate");
   const totalDays = getValues("totalDays");
-  const timeWindow = {end: getValues("endTime"), start: getValues("startTime")  };
+  const timeWindow = {
+    end: getValues("endTime"),
+    start: getValues("startTime"),
+  };
+
 
   const scheduleLabel =
     schedule?.type === "daily"
@@ -40,24 +50,27 @@ const ReviewScreen = () => {
       ? `On ${schedule.days.join(", ")}`
       : "--";
 
-  const submit: SubmitHandler<CreateStreakFormProps> = async (data) => {
+  const submit: SubmitHandler<CreateStreakFormProps> = (data) => {
     try {
-      const result = await createEvent(data);
+      const task = createTask(data, async (id, task) => {
+        const db = await initDBAsync();
 
-      if ("success" in result) {
-        setAlert({
-          title: "Success",
-          type: "success",
-          message: "Task created successfully",
-          action: () => {
-            reset();
-            router.push("/");
-          },
-          button: "Continue",
+        insertTaskAsync(db, task);
+        generateTaskOccurrences(task, (id, occurrence) => {
+          insertOccurrenceAsync(db, occurrence);
         });
-      } else {
-        throw new Error(result.error);
-      }
+      });
+
+      setAlert({
+        title: "Success",
+        type: "success",
+        message: "Task created successfully",
+        action: () => {
+          reset();
+          router.push("/");
+        },
+        button: "Continue",
+      });
     } catch (error: any) {
       setAlert({
         title: "Failed to create task",

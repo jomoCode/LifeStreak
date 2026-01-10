@@ -1,7 +1,3 @@
-import * as SQLite from "expo-sqlite";
-import { Event } from "./CRUDE_sqlite";
-import { initDatabase } from "./crude_sqlite_helpers";
-
 const __DEV__ = process.env.NODE_ENV !== "production";
 
 /**
@@ -70,53 +66,6 @@ const getTodayMidnightUTC = (date?: string): string => {
     )}`;
     if (__DEV__) console.error(message);
     return "Invalid date";
-  }
-};
-
-let db: SQLite.SQLiteDatabase | null = null;
-
-/**
- * Opens the SQLite database asynchronously (singleton pattern).
- */
-const openDB = async () => {
-  initDatabase();
-
-  if (!db) {
-    db = await SQLite.openDatabaseAsync("events.db");
-  }
-  return db;
-};
-
-/**
- * Runs a SQL query and returns the results as an array of type T.
- * Uses the modern async expo-sqlite API for cleaner, promise-based handling.
- *
- * @example
- * const rows = await runSql<{ id: number; name: string }>("SELECT * FROM users");
- */
-const runSql = async <T>(sql: string, params: any[] = []) => {
-  if (!sql?.trim()) {
-    throw new Error("Empty SQL statement");
-  }
-
-  try {
-    const database = await openDB();
-
-    // Detect query type
-    const isSelect = /^\s*SELECT/i.test(sql);
-
-    if (isSelect) {
-      // SELECT queries return rows
-      const results = await database.getAllAsync<T>(sql, params);
-      return results;
-    } else {
-      // For INSERT, UPDATE, DELETE
-      await database.runAsync(sql, params);
-      return [];
-    }
-  } catch (error) {
-    if (__DEV__) console.error("SQLite Query Error:", error);
-    throw error;
   }
 };
 
@@ -212,6 +161,5 @@ export {
   formatTimeTo12Hour,
   getTodayMidnightUTC,
   isYYDDMMFormat,
-  runSql,
   validateUTCDateString,
 };
