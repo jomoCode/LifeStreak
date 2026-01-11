@@ -1,0 +1,41 @@
+- create an alert modal
+- Add goal detail page
+: Show goal name
+: a calendar like listing of goals showing missed, checked and yet to be checked:
+    ui look: it should contain the date of the event, the day (e.g tuesday) and the time. 
+    ui look: the baackground should be green if it's on the current day, red if it's a late and grey if its not yet time
+    ui look: the main text should be   red if late, blinky yellow and red if getting late. and dark gray if yet to come
+    ui look: events in the moringm should be inside a cloudy icon, afternoon sun icon, and evening setting sun icon.
+
+    click the missed, it responds goal can only bechcked within 24 hours time frame
+    click the empty, and it checks or complains goal can only be check on day of the event
+    click check and it becomes unchecked or it complains goal can only be unchecked within the 24 hours time frame. 
+: an edit button to edit goal
+: delete button to delete the goal
+: 
+
+
+TODO
+1. Create an alert component for error warning and success popups.
+2. User should be able to exit event creation screen at any point in time... close button
+3. Date and time screen should show previous value if user returns back to them to make corrections
+4. Work on the copy for creating an event.
+5. Back button for easy scrolling foward and backward across screens.
+6. lsButton background should be gradients from lighter to darker. on click should toggle the color i.e change the direction of the gradient
+7. user should not select end date. end date should be calculated from startDate + duration
+8. edge case: maximum duration: 30 days. minimum.. 2 days. user should not be able to select an interval more than half of duration
+9. If no of times per day is more than one, prompt user to select an hourly     interval
+DONE
+. Setup Basic Goal List Page
++ design the goal tablet
++ design the goal list page
++ move date fetching to context
++ create functions for filtering based on name and Date
++ add filter functionality
+
+
+
+
+POSTPONED
+- postponed: update empty goal list to show unlit firewood with text.. Set a goal to  get your flames burning. 
+- fix  onboarding flashy screen
