@@ -5,6 +5,7 @@ import {
   filterByAlphabeticOrder,
   filterByCreationDate,
 } from "@/lib/generic_helpers";
+import { Task } from "@/types";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -18,7 +19,6 @@ import {
 import { ActionButton } from "../atoms/ActionButton";
 import { Title } from "../atoms/Title";
 import { LsGoal } from "../molecules/LsGoal";
-import { Task } from "@/types";
 
 export const Events = () => {
   const [refreshing, setRefreshing] = useState(false);
@@ -83,9 +83,7 @@ export const Events = () => {
             <LsGoal
               streakName={item.name}
               onPress={() =>
-                router.push(
-                  `/HandleGoals/GoalDetails?goalId=${item.id}`
-                )
+                router.push(`/HandleGoals/GoalDetails?goalId=${item.id}`)
               }
             />
           )}
@@ -98,9 +96,7 @@ export const Events = () => {
         />
       )}
 
-      <ActionButton
-        handleSubmit={() => router.push("/CreateEvents")}
-      />
+      <ActionButton handleSubmit={() => router.push("/CreateEvents")} />
     </View>
   );
 };

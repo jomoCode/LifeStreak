@@ -1,8 +1,11 @@
 import * as SQLite from "expo-sqlite";
 
+let db: SQLite.SQLiteDatabase | null = null;
 
-export const initDBAsync = async () => {
-  const db = await SQLite.openDatabaseAsync("life_streak.db");
+export const getDBAsync = async () => {
+  if (!db) {
+    db = await SQLite.openDatabaseAsync("life_streak.db");
+  }
   return db;
 };
 
@@ -38,20 +41,19 @@ CREATE TABLE IF NOT EXISTS task_occurrences (
 
 export const runAsync = async (
   db: SQLite.SQLiteDatabase,
-  sql: string,
+  sql: string
 ): Promise<void> => {
-    try{
-  await db.withTransactionAsync(async () => {
-    await db.execAsync(sql);
-  });}
-  catch(error) {
-    console.error('error persisting task', error)
+  try {
+    await db.withTransactionAsync(async () => {
+      await db.execAsync(sql);
+    });
+  } catch (error) {
+    console.error("error persisting task", error);
   }
 };
 
-
-
-export const initializeDatabaseAsync = async (db: SQLite.SQLiteDatabase) => {
+export const initializeDatabaseAsync = async () => {
+  const db = await getDBAsync();
   try {
     await runAsync(db, CREATE_TASKS_TABLE);
     await runAsync(db, CREATE_OCCURRENCES_TABLE);

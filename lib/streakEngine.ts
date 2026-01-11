@@ -44,7 +44,7 @@ export type CreateTask = {
 
 export const createTask = (
   input: CreateTask,
-  db: (id: string, task: Task) => void
+  createdTask: (id: string, task: Task) => void
 ): Task => {
   validateCreateTaskInput(input);
   const data = normalizeCreateTaskInput(input);
@@ -64,7 +64,7 @@ export const createTask = (
     updatedAt: new Date(now),
   };
 
-  db(task.id, task);
+  createdTask(task.id, task);
   return task;
 };
 
@@ -102,7 +102,6 @@ export const generateTaskOccurrences = (
   let cursor = new Date(start);
 
   while (generatedCount < totalDays) {
-    console.log("what is my cursor", cursor);
     const weekday = weekdayFromDate(cursor);
 
     const shouldOccur =

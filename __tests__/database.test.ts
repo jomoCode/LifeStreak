@@ -3,7 +3,7 @@ import {
   insertTaskAsync,
 } from "../lib/database/databaseHandlers";
 import {
-  initDBAsync,
+  getDBAsync,
   initializeDatabaseAsync,
 } from "../lib/database/initializeDb";
 import { TaskOccurrence } from "../lib/streakEngine";
@@ -29,7 +29,7 @@ describe("Database handlers", () => {
   let db: any;
 
   beforeEach(async () => {
-    db = await initDBAsync(); // now db is our mock object
+    db = await getDBAsync(); // now db is our mock object
     await initializeDatabaseAsync(db); // works with mocked methods
   });
 

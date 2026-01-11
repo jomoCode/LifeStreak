@@ -1,9 +1,11 @@
 import { useButtonStyles, useOnboardingStyles } from "@/hooks/styles/useStyles";
 import { useColors } from "@/hooks/useColors";
+import { initializeDatabaseAsync } from "@/lib/database/initializeDb";
 import { MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Router, useRouter } from "expo-router";
 import * as React from "react";
+import { useEffect } from "react";
 import { FlatList, Image, Text, View, type ViewToken } from "react-native";
 import { LsButton } from "../atoms/LsButton";
 
@@ -60,6 +62,15 @@ const OnboardingScreen = () => {
   const flatListRef = React.useRef<FlatList<
     (typeof onBoardingScreenPages)[number]
   > | null>(null);
+
+  // Create database tables upon component mount
+  useEffect(() => {
+    const createDb = async () => {
+      await initializeDatabaseAsync();
+    };
+
+    createDb();
+  }, []);
 
   // HELPERS
   const handleNext = () => {

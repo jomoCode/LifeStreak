@@ -7,7 +7,6 @@ import {
   insertOccurrenceAsync,
   insertTaskAsync,
 } from "@/lib/database/databaseHandlers";
-import { initDBAsync } from "@/lib/database/initializeDb";
 import { createTask, generateTaskOccurrences } from "@/lib/streakEngine";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -60,11 +59,9 @@ const ReviewScreen = () => {
 
     try {
       createTask(task, async (id, task) => {
-        const db = await initDBAsync();
-
-        insertTaskAsync(db, task);
-        generateTaskOccurrences(task, (id, occurrence) => {
-          insertOccurrenceAsync(db, occurrence);
+        await insertTaskAsync(task);
+        generateTaskOccurrences(task, async (id, occurrence) => {
+         await insertOccurrenceAsync(occurrence);
         });
       });
 

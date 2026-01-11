@@ -1,3 +1,5 @@
+import { readTasksAsync } from "@/lib/database/databaseHandlers";
+import { Task } from "@/types";
 import {
   createContext,
   ReactNode,
@@ -5,9 +7,6 @@ import {
   useEffect,
   useState,
 } from "react";
-import { Task } from "@/types";
-import { initDBAsync } from "@/lib/database/initializeDb";
-import { readTasksAsync } from "@/lib/database/databaseHandlers";
 
 type DbProviderProps = { children: ReactNode };
 
@@ -32,8 +31,7 @@ export const DbProvider = ({ children }: DbProviderProps) => {
     const loadTasks = async () => {
       setLoading(true);
       try {
-        const db = await initDBAsync();
-        const tasks = await readTasksAsync(db);
+        const tasks = await readTasksAsync();
         setData(tasks);
       } catch (err) {
         console.error("Failed to load tasks:", err);
@@ -58,4 +56,3 @@ export const useDb = () => {
   if (!context) throw new Error("useDb must be used within DbProvider");
   return context;
 };
-

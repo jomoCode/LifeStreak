@@ -1,11 +1,11 @@
-
-import { SQLiteDatabase as SQLiteDB } from "expo-sqlite";
-import { TaskOccurrence } from "../streakEngine";
 import { Task } from "@/types";
+import { TaskOccurrence } from "../streakEngine";
+import { getDBAsync } from "./initializeDb";
 
-export type InsertTask = (db: SQLiteDB, task: Task) => Promise<void>;
+export type InsertTask = (task: Task) => Promise<void>;
 
-export const insertTaskAsync: InsertTask = async (db, task) => {
+export const insertTaskAsync: InsertTask = async (task) => {
+  const db = await getDBAsync();
   const stmt = `
     INSERT INTO tasks (
       id,
@@ -43,15 +43,11 @@ export const insertTaskAsync: InsertTask = async (db, task) => {
  * --------------------------------INSERT OCCOURRENCE--------------------------------------------------------------------------
  */
 
-type InsertOccurrence = (
-  db: SQLiteDB,
-  occurrence: TaskOccurrence
-) => Promise<void>;
+type InsertOccurrence = (occurrence: TaskOccurrence) => Promise<void>;
 
-export const insertOccurrenceAsync: InsertOccurrence = async (
-  db,
-  occurrence
-) => {
+export const insertOccurrenceAsync: InsertOccurrence = async (occurrence) => {
+  const db = await getDBAsync();
+
   const stmt = `
     INSERT INTO task_occurrences (
       id,
@@ -77,13 +73,10 @@ export const insertOccurrenceAsync: InsertOccurrence = async (
  * --------------------------------CHECK OCCOURRENCE--------------------------------------------------------------------------
  */
 
-type CheckOccurrence = (
-  db: SQLiteDB,
-  taskId: string,
-  date: string
-) => Promise<void>;
+type CheckOccurrence = (taskId: string, date: string) => Promise<void>;
 
-export const checkOccurrence: CheckOccurrence = async (db, taskId, date) => {
+export const checkOccurrence: CheckOccurrence = async (taskId, date) => {
+  const db = await getDBAsync();
   const stmt = `
     UPDATE task_occurrences
     SET status = 'checked',
@@ -99,10 +92,10 @@ export const checkOccurrence: CheckOccurrence = async (db, taskId, date) => {
  */
 
 export const uncheckOccurrence = async (
-  db: SQLiteDB,
   taskId: string,
   date: string
 ): Promise<void> => {
+  const db = await getDBAsync();
   const stmt = `
     UPDATE task_occurrences
     SET status = 'unchecked',
@@ -130,7 +123,8 @@ generateTaskOccurrences(task, (_, occurrence) => {
 /* ----------------------------------------------------------------------------------------
 -------------------------------READ TASKS----------------------------------------*/
 
-export const readTasksAsync = async (db: SQLiteDB): Promise<Task[]> => {
+export const readTasksAsync = async (): Promise<Task[]> => {
+  const db = await getDBAsync();
   const stmt = `
     SELECT
       id,
@@ -151,6 +145,10 @@ export const readTasksAsync = async (db: SQLiteDB): Promise<Task[]> => {
 
   const result = await db.getAllAsync<any>(stmt);
 
+  if (result.length <= 0) {
+    console.log("No tasks found in database");
+    return [];
+  }
   return result.map((row) => ({
     id: row.id,
     name: row.name,
@@ -177,7 +175,6 @@ export const readTasksAsync = async (db: SQLiteDB): Promise<Task[]> => {
   }));
 };
 
-
 /* ----------------------------------------------------------------------------------------
 --------------------------------READ OCCURRENCES-------------------------------------------
 */
@@ -194,9 +191,9 @@ export const readTasksAsync = async (db: SQLiteDB): Promise<Task[]> => {
  * should be derived outside this layer.
  */
 export const readOccurrencesByTaskAsync = async (
-  db: SQLiteDB,
   taskId: string
 ): Promise<TaskOccurrence[]> => {
+  const db = await getDBAsync();
   const stmt = `
     SELECT
       id,

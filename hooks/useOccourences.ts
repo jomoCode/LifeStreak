@@ -1,9 +1,9 @@
 // useOccurrences.ts
 
-import { useEffect, useState } from "react";
-import { initDBAsync } from "@/lib/database/initializeDb";
-import { TaskOccurrence } from "@/lib/streakEngine";
 import { readOccurrencesByTaskAsync } from "@/lib/database/databaseHandlers";
+import { getDBAsync } from "@/lib/database/initializeDb";
+import { TaskOccurrence } from "@/lib/streakEngine";
+import { useEffect, useState } from "react";
 
 /**
  * Fetches all occurrences for a single task.
@@ -19,7 +19,7 @@ export const useOccurrences = (taskId: string) => {
     const load = async () => {
       setLoading(true);
       try {
-        const db = await initDBAsync();
+        const db = await getDBAsync();
         const rows = await readOccurrencesByTaskAsync(db, taskId);
         setOccurrences(rows);
       } catch (e) {

@@ -1,13 +1,10 @@
 import { LsButton } from "@/components/ui/atoms/LsButton";
-import { CreateStreakFormProps } from "@/context/CreateStreakForm_";
 import { useGeneralStyles } from "@/hooks/styles/useStyles";
-import { EventType } from "@/lib/CRUDE_sqlite";
 import { MaterialIcons } from "@expo/vector-icons";
 import React, { ReactNode } from "react";
-import { useFormContext } from "react-hook-form";
 import { Text, View } from "react-native";
 
-type Field = EventType;
+type Field = 'name' | 'totalDays' | 'startDate' | 'endDate' | 'schedule' | 'startTime' | 'endTime'|'status';
 type CreateEventProps = {
   field: Field;
   moveToNextStep: () => void;

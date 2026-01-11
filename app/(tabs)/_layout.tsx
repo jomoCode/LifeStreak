@@ -19,9 +19,9 @@ const TAB_CONFIG: TabConfig[] = [
     icon: "figure.gymnastics.circle",
   },
   {
-    name: "CreateEvent",
-    title: "new",
-    icon: "plus",
+    name: "Adherence",
+    title: "Adherence",
+    icon: "flame",
   },
 ];
 
