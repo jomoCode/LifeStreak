@@ -1,9 +1,4 @@
-import * as SQLite from "expo-sqlite";
-import { initDatabase } from "./CRUDE_sqlite";
-
-
-
-
+import { Task } from "@/types";
 
 const __DEV__ = process.env.NODE_ENV !== "production";
 
@@ -13,7 +8,7 @@ const __DEV__ = process.env.NODE_ENV !== "production";
  * - Replaces spaces and invalid filesystem characters with underscores
  * - Collapses multiple underscores
  */
-export const cleanFileName = (input: string, lowercase = false): string => {
+const cleanFileName = (input: string, lowercase = false): string => {
   if (typeof input !== "string") return "";
   let cleaned = input
     .trim()
@@ -31,7 +26,7 @@ export const cleanFileName = (input: string, lowercase = false): string => {
  * @example
  * validateUTCDateString("2025-10-11T00:00:00Z", "startDate");
  */
-export const validateUTCDateString = (dateStr: string, fieldName = "date"): void => {
+const validateUTCDateString = (dateStr: string, fieldName = "date"): void => {
   const isoUTCMidnightRegex =
     /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])T00:00:00Z$/;
 
@@ -47,6 +42,13 @@ export const validateUTCDateString = (dateStr: string, fieldName = "date"): void
   }
 };
 
+/*
+ YYYY-MM-DD basic check (does not check for invalid dates like 2025-02-30)
+*/
+const isYYDDMMFormat = (v: string) => {
+  return /^\d{4}-\d{2}-\d{2}$/.test(v);
+};
+
 /**
  * Returns a date string set to midnight UTC (00:00:00Z) in ISO 8601 format.
  * Optionally accepts a date string to normalize to UTC midnight.
@@ -54,73 +56,99 @@ export const validateUTCDateString = (dateStr: string, fieldName = "date"): void
  * @example
  * getTodayMidnightUTC(); // => "2025-11-11T00:00:00.000Z"
  */
-export const getTodayMidnightUTC = (date?: string): string => {
+const getTodayMidnightUTC = (date?: string): string => {
   try {
     const now = date ? new Date(date) : new Date();
     if (isNaN(now.getTime())) throw new Error("Invalid date");
     now.setUTCHours(0, 0, 0, 0);
     return now.toISOString();
   } catch (error: unknown) {
-    const message = `Invalid date provided to getTodayMidnightUTC: ${date} - ${String(error)}`;
+    const message = `Invalid date provided to getTodayMidnightUTC: ${date} - ${String(
+      error
+    )}`;
     if (__DEV__) console.error(message);
     return "Invalid date";
   }
 };
 
-
-let db: SQLite.SQLiteDatabase | null = null;
+/**
+ * convert all values to string
+ */
+const convert2String = (value: unknown) => (value == null ? "" : String(value));
 
 /**
- * Opens the SQLite database asynchronously (singleton pattern).
+ * convert all values to number
  */
-async function openDB(): Promise<SQLite.SQLiteDatabase> {
-  initDatabase()
-  
-  if (!db) {
-    db = await SQLite.openDatabaseAsync("events.db");
+const convert2Number = (value: unknown, errorLocation: string) => {
+  const number2Convert = Number(value);
+  if (Number.isFinite(number2Convert)) return number2Convert;
+  else {
+    throw new Error(
+      `failure converting value to number: error Location: ${errorLocation}`
+    );
   }
-  return db;
-}
+};
 
 /**
- * Runs a SQL query and returns the results as an array of type T.
- * Uses the modern async expo-sqlite API for cleaner, promise-based handling.
- *
- * @example
- * const rows = await runSql<{ id: number; name: string }>("SELECT * FROM users");
+ * Convert time string: HH:MM to ISO time string
  */
-export async function runSql<T = any>(sql: string, params: any[] = []): Promise<T[]> {
-  if (!sql?.trim()) {
-    throw new Error("Empty SQL statement");
-  }
+const convertHHMM_2IsoTimeString = (timeString: string, isoDate: string) => {
+  // Time string format: "HH:MM"
+  const [hourStr = "0", minuteStr = "0"] = timeString.split(":");
+  if (hourStr === "0" || minuteStr === "0")
+    throw new Error("Invalid time timeString: convertHHMM_2IsoTimeString");
+  if (!isoDate.includes("T"))
+    throw new Error("Invalid date supplied: convertHHMM_2IsoTimeString");
+  const date = new Date(isoDate);
+  const hour = convert2Number(hourStr, "hour convertHHMM_2IsoTimeString");
+  const minute = convert2Number(minuteStr, "minute convertHHMM_2IsoTimeString");
+  date.setUTCHours(hour, minute, 0, 0);
+  return date.toISOString();
+};
 
-  try {
-    const database = await openDB();
+/*
+--DATA FILTERS
+--DATA FILTERS
+--DATA FILTERS
+*/
 
-    // Detect query type
-    const isSelect = /^\s*SELECT/i.test(sql);
+// Default filter
 
-    if (isSelect) {
-      // SELECT queries return rows
-      const results = await database.getAllAsync<T>(sql, params);
-      return results;
-    } else {
-      // For INSERT, UPDATE, DELETE
-      await database.runAsync(sql, params);
-      return [];
-    }
-  } catch (error) {
-    if (__DEV__) console.error("SQLite Query Error:", error);
-    throw error;
-  }
-}
 
-export default {
-  cleanFileName,
-  getTodayMidnightUTC,
-  validateUTCDateString,
-  runSql,
+
+const filterByCreationDate = (data: Task[]) => {
+  return [...data].sort(
+    (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+  );
 };
 
 
+const filterByAlphabeticOrder = (data: Task[]) => {
+  return [...data].sort((a, b) =>
+    a.name.localeCompare(b.name, undefined, {
+      sensitivity: "base",
+    })
+  );
+};
 
+const formatTimeTo12Hour = (time24: string) => {
+  const [hourStr, minuteStr] = time24.split(":");
+  let hour = Number(hourStr);
+  const minute = Number(minuteStr);
+  const ampm = hour >= 12 ? "PM" : "AM";
+  hour = hour % 12 || 12;
+  return `${hour}:${minute.toString().padStart(2, "0")} ${ampm}`;
+};
+
+export {
+  cleanFileName,
+  convert2Number,
+  convert2String,
+  convertHHMM_2IsoTimeString,
+  filterByAlphabeticOrder,
+  filterByCreationDate,
+  formatTimeTo12Hour,
+  getTodayMidnightUTC,
+  isYYDDMMFormat,
+  validateUTCDateString,
+};
