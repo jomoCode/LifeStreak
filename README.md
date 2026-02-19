@@ -64,7 +64,4 @@ Use the atomic pattern to build reusable UI components.
 Start from atoms, then compose molecules, organisms, and finally pages.
 This keeps your project flexible, modular, and easy to maintain.
 
-Author: Mogbolu John-Johanan
-Location: Lekki, Lagos, Nigeria
-GitHub: @Jomoartz
-LinkedIn: Mogbolu John-Johanan
+
